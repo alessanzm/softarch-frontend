@@ -1,1 +1,1 @@
-const API_BASE_URL = "https://softarch-backend.onrender.com";
+const API_BASE_URL = "https://softarch-backend-2.onrender.com";
