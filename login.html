@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Sign In</title>
     <link rel="stylesheet" href="style.css">
-    <script src="js/config.js"></script>
+    <script src="config.js"></script>
     <script>
         function checkRoleInput() {
             const role = document.getElementById("loginRole").value;
@@ -64,7 +64,8 @@
             };
 
             try {
-                const res = await fetch(`${API_BASE_URL}/api/login`, {
+                // 👇 SUDAH DIBETULKAN: Menggunakan API_URL yang sepadan dengan config.js
+                const res = await fetch(`${API_URL}/api/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)

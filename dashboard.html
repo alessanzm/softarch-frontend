@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Academic Workspace Dashboard</title>
     <link rel="stylesheet" href="style.css">
-    <script src="js/config.js"></script>
+    <script src="config.js"></script>
 </head>
 <body>
     <div class="navbar">
@@ -88,12 +88,12 @@
         // Configure layout layers views structure constraints
         if (role === 'admin') {
             document.getElementById('managementView').style.display = 'block';
-            document.getElementById('lecturerAssignmentGroup').style.display = 'block'; // Show drop box to Admin
+            document.getElementById('lecturerAssignmentGroup').style.display = 'block'; 
             document.getElementById('adminTableContainer').style.display = 'table';
             document.getElementById('tableTitle').innerText = "Global System Catalog Index (Admin Master Privileges)";
         } else if (role === 'lecturer') {
             document.getElementById('managementView').style.display = 'block';
-            document.getElementById('lecturerAssignmentGroup').style.display = 'none';  // Hide drop box from Lecturer
+            document.getElementById('lecturerAssignmentGroup').style.display = 'none';  
             document.getElementById('cardsLayoutContainer').className = 'course-grid';
             document.getElementById('cardsLayoutContainer').style.display = 'grid';
             document.getElementById('tableTitle').innerText = "Assigned Teaching Syllabus Modules";
@@ -113,11 +113,10 @@
             setTimeout(() => { container.style.display = 'none'; }, 3500);
         }
 
-        // FETCH QUERY CONTROLLER
+        // FETCH QUERY CONTROLLER (Guna API_URL yang betul)
         async function pullDirectoryData() {
             try {
-                // 👇 FIXED ENDPOINT ROUTE: Prevents duplicate injection paths
-                const res = await fetch(`${API_BASE_URL}/api/courses?role=${role}&userId=${userId}`);
+                const res = await fetch(`${API_URL}/api/courses?role=${role}&userId=${userId}`);
                 const courses = await res.json();
                 
                 if (role === 'student' || role === 'lecturer') {
@@ -183,7 +182,7 @@
         document.getElementById('joinCourseForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
-                const res = await fetch(`${API_BASE_URL}/api/courses/enroll`, {
+                const res = await fetch(`${API_URL}/api/courses/enroll`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -209,7 +208,6 @@
             e.preventDefault();
             const id = document.getElementById('courseId').value;
             
-            // Calculate dynamic selection target
             let assignedLecturerId = 0;
             if (role === 'lecturer') {
                 assignedLecturerId = parseInt(userId);
@@ -223,10 +221,10 @@
                 title: document.getElementById('courseTitle').value.trim(),
                 description: document.getElementById('courseDesc').value.trim(),
                 lecturerId: assignedLecturerId,
-                role: role // 👇 CRITICAL: Sent over authorization middleware verification gate filters
+                role: role 
             };
 
-            let targetUrl = id ? `${API_BASE_URL}/api/courses/${id}` : `${API_BASE_URL}/api/courses`;
+            let targetUrl = id ? `${API_URL}/api/courses/${id}` : `${API_URL}/api/courses`;
             let targetMethod = id ? 'PUT' : 'POST';
 
             try {
@@ -254,10 +252,10 @@
         async function dropCourseEntry(courseId) {
             if (!confirm("Are you sure you want to permanently delete this course row entry?")) return;
             try {
-                const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}`, {
+                const res = await fetch(`${API_URL}/api/courses/${courseId}`, {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ role: role }) // Passes active role token validation tracking check
+                    body: JSON.stringify({ role: role }) 
                 });
                 if (res.ok) {
                     await pullDirectoryData();
@@ -298,7 +296,7 @@
             window.location.href = "index.html";
         }
 
-        // Inherent startup script execution loop
+        // Start data pull
         pullDirectoryData();
     </script>
 </body>
