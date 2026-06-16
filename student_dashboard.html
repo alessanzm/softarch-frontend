@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartLearn | Student Workspace</title>
     <link rel="stylesheet" href="style.css">
-    <script src="js/config.js"></script>
+    <script src="config.js"></script>
 </head>
 <body>
     <div class="navbar">
@@ -20,18 +20,18 @@
         <div id="notifyMessage" style="display: none; padding: 12px; font-size: 14px; margin-bottom: 25px; text-align: center; border-radius: 8px; font-weight: 600;"></div>
 
         <div class="card" style="max-width: 450px;">
-            <h2 style="color: var(--primary-blue); font-size: 18px; margin-bottom: 15px;">Enroll In New Course</h2>
+            <h2 style="color: #2563eb; font-size: 18px; margin-bottom: 15px;">Enroll In New Course</h2>
             <form id="joinCourseForm">
                 <label>Course Code String</label>
-                <input type="text" id="enrollCourseCode" placeholder="e.g. CSF3433" style="text-transform: uppercase;" required>
+                <input type="text" id="enrollCourseCode" placeholder="e.g. CSF3433" style="text-transform: uppercase;" required style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #cbd5e1; border-radius:4px;">
                 <button type="submit" class="join-btn" style="width: 100%;">Process Enrollment</button>
             </form>
         </div>
 
         <div class="card">
-            <h2 style="color: var(--primary-blue); font-size: 20px; margin-top:0; margin-bottom: 15px;">My Enrolled Academic Core Modules</h2>
+            <h2 style="color: #2563eb; font-size: 20px; margin-top:0; margin-bottom: 15px;">My Enrolled Academic Core Modules</h2>
             <div id="cardsLayoutContainer" class="course-grid">
-                <p style="color: var(--text-muted); font-style:italic;">Querying active curriculum rosters...</p>
+                <p style="color: #64748b; font-style:italic;">Querying active curriculum rosters...</p>
             </div>
         </div>
     </div>
@@ -57,49 +57,37 @@
         }
 
         async function pullDirectoryData() {
-    try {
-        const currentUserId = localStorage.getItem('user_id');
-        const currentRole = localStorage.getItem('user_role');
+            try {
+                const currentUserId = localStorage.getItem('user_id');
+                const currentRole = localStorage.getItem('user_role');
 
-        const res = await fetch(`${API_BASE_URL}/api/courses?role=${currentRole}&userId=${currentUserId}`);
-        
-        if (!res.ok) {
-            throw new Error("Respons daripada pelayan tidak memuaskan.");
-        }
+                const res = await fetch(`${API_BASE_URL}/api/courses?role=${currentRole}&userId=${currentUserId}`);
+                if (!res.ok) throw new Error("Gagal mengambil data dari API.");
 
-        const courses = await res.json();
-        const grid = document.getElementById('cardsLayoutContainer');
-        grid.innerHTML = '';
-        
-        if (!Array.isArray(courses) || courses.length === 0) {
-            grid.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; padding: 20px; background: #f8fafc; border-radius: 8px;">
-                    <p style="color: #64748b; margin: 0; font-style: italic;">Anda belum mendaftar dalam mana-mana kursus.</p>
-                </div>`;
-            return;
-        }
+                const courses = await res.json();
+                const grid = document.getElementById('cardsLayoutContainer');
+                grid.innerHTML = '';
+                
+                if (!Array.isArray(courses) || courses.length === 0) {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 20px; background: #f8fafc; border-radius: 8px;">
+                            <p style="color: #64748b; margin: 0; font-style: italic;">Anda belum mendaftar dalam mana-mana kursus.</p>
+                        </div>`;
+                    return;
+                }
 
-        courses.forEach((c, index) => {
-            grid.innerHTML += `
-                <div class="course-card" style="border-left: 4px solid #3b82f6; margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <h3 style="margin: 0; color: #1e293b;">${index + 1}. ${(c.title || 'Untitled').toUpperCase()}</h3>
-                    <p style="color: #2563eb; font-weight: bold; margin: 5px 0;">Code: ${c.courseCode}</p>
-                    <p style="margin: 5px 0 0 0; color: #475569; font-size: 14px;">${c.description || 'Tiada deskripsi disediakan.'}</p>
-                </div>
-            `;
-        });
-
-    } catch (err) {
-        console.error("Ralat Frontend:", err);
-        const container = document.getElementById('notifyMessage');
-        container.innerText = "Error sync with backend API pipeline query operations.";
-        container.style.display = 'block';
-        container.style.background = '#fee2e2';
-        container.style.color = '#991b1b';
-    }
+                courses.forEach((c, index) => {
+                    grid.innerHTML += `
+                        <div class="course-card" style="border-left: 4px solid #3b82f6; margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <h3 style="margin: 0; color: #1e293b;">${index + 1}. ${(c.title || 'Untitled').toUpperCase()}</h3>
+                            <p style="color: #2563eb; font-weight: bold; margin: 5px 0;">Code: ${c.courseCode}</p>
+                            <p style="margin: 5px 0 0 0; color: #475569; font-size: 14px;">${c.description || 'Tiada deskripsi disediakan.'}</p>
+                        </div>
+                    `;
                 });
             } catch (err) {
-                triggerAlert("Error matching layout with backend API pipeline query operations.", false);
+                console.error(err);
+                triggerAlert("Error sync with backend API pipeline query operations.", false);
             }
         }
 
