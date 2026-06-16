@@ -3,154 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartLearn | Student Dashboard</title>
+    <title>SmartLearn | Student Workspace</title>
     <link rel="stylesheet" href="style.css">
-    <script src="config.js"></script>
+    <script src="js/config.js"></script>
 </head>
 <body>
-
-<!-- NAVBAR (Hanya Papar Maklumat Student) -->
-<div class="navbar">
-    <h2>SMARTLEARN STUDENT CORE</h2>
-    <div>
-        <span id="userGreeting" style="color: #cbd5e1; margin-right: 15px; font-weight: 600; font-size:14px;"></span>
-        <button onclick="logout()" class="logout-btn" style="padding: 6px 12px;">Sign Out</button>
-    </div>
-</div>
-
-<div class="container">
-    <!-- Box Notifikasi Ringkas -->
-    <div id="notifyMessage" style="display: none; padding: 12px; font-size: 14px; margin-bottom: 25px; text-align: center; border-radius: 8px; font-weight: 600;"></div>
-
-    <!-- BAHAGIAN 1: SEARCH & ENROLL COURSE -->
-    <div class="card" style="max-width: 500px; margin-bottom: 30px;">
-        <h3 style="color: var(--primary-blue); margin-top:0; margin-bottom: 15px;">Search & Enroll New Course</h3>
-        <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 15px;">
-            Masukkan kod kursus yang sah (contoh: CSF3433) untuk mendaftar masuk ke dalam kelas modul secara langsung.
-        </p>
-        <form id="joinCourseForm">
-            <label for="enrollCourseCode"><strong>Course Code String</strong></label>
-            <div style="display: flex; gap: 10px; margin-top: 5px;">
-                <input type="text" id="enrollCourseCode" placeholder="e.g. CSF3433" style="text-transform: uppercase; margin: 0; flex: 1;" required>
-                <button type="submit" style="white-space: nowrap; width: auto; padding: 0 20px;">Process Enrollment</button>
-            </div>
-        </form>
-    </div>
-
-    <!-- BAHAGIAN 2: PAPARAN COURSE YANG SEDANG DI-ENROLL -->
-    <div class="card">
-        <h3 style="color: var(--primary-blue); margin-top:0; margin-bottom: 20px;">My Enrolled Academic Core Modules</h3>
-        
-        <!-- Grid Kursus Dinamik -->
-        <div id="cardsLayoutContainer" class="course-grid">
-            <p style="color: var(--text-muted); font-style: italic;">Querying active curriculum rosters...</p>
+    <div class="navbar">
+        <h2>SMARTLEARN STUDENT CORE</h2>
+        <div>
+            <span id="userGreeting" style="color: #cbd5e1; margin-right: 15px; font-weight: 600; font-size:14px;"></span>
+            <button onclick="logout()" class="logout-btn" style="padding: 6px 12px;">Sign Out</button>
         </div>
     </div>
-</div>
+    
+    <div class="container">
+        <div id="notifyMessage" style="display: none; padding: 12px; font-size: 14px; margin-bottom: 25px; text-align: center; border-radius: 8px; font-weight: 600;"></div>
 
-<script>
-    // Ambil data session login
-    const userId = localStorage.getItem('user_id');
-    const role = localStorage.getItem('user_role') || '';
-    const name = localStorage.getItem('user_name') || 'Student';
+        <div class="card" style="max-width: 450px;">
+            <h2 style="color: var(--primary-blue); font-size: 18px; margin-bottom: 15px;">Enroll In New Course</h2>
+            <form id="joinCourseForm">
+                <label>Course Code String</label>
+                <input type="text" id="enrollCourseCode" placeholder="e.g. CSF3433" style="text-transform: uppercase;" required>
+                <button type="submit" class="join-btn" style="width: 100%;">Process Enrollment</button>
+            </form>
+        </div>
 
-    // Sekatan Keselamatan Ketat: Hanya Student sahaja boleh lihat halaman ini
-    if (!userId || role !== 'student') {
-        localStorage.clear();
-        window.location.href = "login.html";
-    } else {
+        <div class="card">
+            <h2 style="color: var(--primary-blue); font-size: 20px; margin-top:0; margin-bottom: 15px;">My Enrolled Academic Core Modules</h2>
+            <div id="cardsLayoutContainer" class="course-grid">
+                <p style="color: var(--text-muted); font-style:italic;">Querying active curriculum rosters...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userId = localStorage.getItem('user_id');
+        const role = localStorage.getItem('user_role');
+        const name = localStorage.getItem('user_name');
+
+        if (!userId || role !== 'student') { 
+            localStorage.clear();
+            window.location.href = "login.html"; 
+        }
         document.getElementById('userGreeting').innerText = `${name.toUpperCase()} [STUDENT]`;
-        pullStudentCatalogRoster(); // Ambil senarai kursus yang telah didaftar
-    }
 
-    // Fungsi Papar Mesej Ralat/Sukses
-    function triggerAlert(message, successState = true) {
-        const container = document.getElementById('notifyMessage');
-        container.innerText = message;
-        container.style.display = 'block';
-        container.style.background = successState ? '#dcfce7' : '#fee2e2';
-        container.style.color = successState ? '#166534' : '#991b1b';
-        setTimeout(() => { container.style.display = 'none'; }, 4000);
-    }
+        function triggerAlert(message, successState = true) {
+            const container = document.getElementById('notifyMessage');
+            container.innerText = message;
+            container.style.display = 'block';
+            container.style.background = successState ? '#dcfce7' : '#fee2e2';
+            container.style.color = successState ? '#166534' : '#991b1b';
+            setTimeout(() => { container.style.display = 'none'; }, 3500);
+        }
 
-    // FUNGSI UTAMA 1: Papar Kursus yang Tengah di-Enroll
-    async function pullStudentCatalogRoster() {
-        try {
-            const res = await fetch(`${API_BASE_URL}/api/courses?role=${role}&userId=${userId}`);
-            if (!res.ok) throw new Error();
-            const courses = await res.json();
+        async function pullDirectoryData() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/courses?role=${role}&userId=${userId}`);
+                const courses = await res.json();
+                
+                const grid = document.getElementById('cardsLayoutContainer');
+                grid.innerHTML = '';
+                
+                if (!courses || courses.length === 0) {
+                    grid.innerHTML = `<p style="color: var(--text-muted); font-style:italic;">Anda belum mendaftar dalam mana-mana kursus.</p>`;
+                    return;
+                }
 
-            const grid = document.getElementById('cardsLayoutContainer');
-            grid.innerHTML = '';
-
-            // Jika student belum enroll apa-apa kursus
-            if (!courses || courses.length === 0) {
-                grid.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 30px; background: #f8fafc; border-radius: 8px; border: 2px dashed #cbd5e1;">
-                        <p style="color: #64748b; margin: 0; font-style: italic;">Anda belum mendaftar dalam mana-mana modul akademik saat ini.</p>
-                    </div>`;
-                return;
-            }
-
-            // Suntik kad kursus ke dalam HTML secara dinamik
-            courses.forEach((c, idx) => {
-                grid.innerHTML += `
-                    <div class="course-card" style="border-left: 4px solid var(--primary-blue);">
-                        <div>
-                            <h3 style="margin-top:0; color: #1e293b;">${idx + 1}. ${(c.title || '').toUpperCase()}</h3>
-                            <p style="color: var(--secondary-blue); font-weight:700; margin-top:5px; margin-bottom:10px; font-size: 14px;">
-                                Code: <span style="background: #e0f2fe; padding: 2px 6px; border-radius: 4px;">${c.courseCode}</span>
-                            </p>
-                            <p style="color: #4a5568; font-size:14px; line-height: 1.5; margin:0;">${c.description || 'No module specifications provided.'}</p>
+                courses.forEach((c, index) => {
+                    grid.innerHTML += `
+                        <div class="course-card">
+                            <div>
+                                <h3>${index + 1}. ${c.title.toUpperCase()}</h3>
+                                <p style="color: var(--secondary-blue); font-weight:700; margin-top:5px;">Code: ${c.courseCode}</p>
+                                <p style="margin-top:10px; color:#4a5568;">${c.description || 'No module criteria provided.'}</p>
+                            </div>
                         </div>
-                    </div>
-                `;
-            });
-        } catch (err) {
-            triggerAlert("Gagal memuatkan data senarai kursus anda.", false);
-        }
-    }
-
-    // FUNGSI UTAMA 2: Search & Join Course Baru via Code
-    document.getElementById('joinCourseForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const codeInput = document.getElementById('enrollCourseCode');
-        const submitBtn = e.target.querySelector('button');
-        
-        submitBtn.disabled = true;
-        submitBtn.innerText = "Processing...";
-
-        try {
-            const res = await fetch(`${API_BASE_URL}/api/courses/enroll`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    studentId: parseInt(userId),
-                    courseCode: codeInput.value.trim().toUpperCase() // Auto tukar ke huruf besar
-                })
-            });
-            const data = await res.json();
-            
-            if (res.ok) {
-                triggerAlert("Pendaftaran kursus berjaya ditambah!");
-                codeInput.value = ''; // Kosongkan input kotak carian
-                await pullStudentCatalogRoster(); // Muat semula senarai kursus di bawah secara live
-            } else {
-                triggerAlert(data.error || "Pendaftaran ditolak. Kod kursus mungkin tidak wujud.", false);
+                    `;
+                });
+            } catch (err) {
+                triggerAlert("Error matching layout with backend API pipeline query operations.", false);
             }
-        } catch (error) {
-            triggerAlert("Ralat rangkaian ketika memproses pendaftaran.", false);
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerText = "Process Enrollment";
         }
-    });
 
-    // Fungsi Log Out
-    function logout() {
-        localStorage.clear();
-        window.location.href = "login.html";
-    }
-</script>
+        document.getElementById('joinCourseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/courses/enroll`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        studentId: parseInt(userId),
+                        courseCode: document.getElementById('enrollCourseCode').value.trim().toUpperCase()
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    triggerAlert("Enrollment tracking added cleanly!");
+                    document.getElementById('enrollCourseCode').value = '';
+                    await pullDirectoryData();
+                } else {
+                    triggerAlert(data.error || "Enrollment process exception.", false);
+                }
+            } catch (error) {
+                triggerAlert("Network failure processing enrollment request.", false);
+            }
+        });
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
+
+        pullDirectoryData();
+    </script>
 </body>
 </html>
