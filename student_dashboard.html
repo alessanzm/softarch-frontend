@@ -57,28 +57,46 @@
         }
 
         async function pullDirectoryData() {
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/courses?role=${role}&userId=${userId}`);
-                const courses = await res.json();
-                
-                const grid = document.getElementById('cardsLayoutContainer');
-                grid.innerHTML = '';
-                
-                if (!courses || courses.length === 0) {
-                    grid.innerHTML = `<p style="color: var(--text-muted); font-style:italic;">Anda belum mendaftar dalam mana-mana kursus.</p>`;
-                    return;
-                }
+    try {
+        const currentUserId = localStorage.getItem('user_id');
+        const currentRole = localStorage.getItem('user_role');
 
-                courses.forEach((c, index) => {
-                    grid.innerHTML += `
-                        <div class="course-card">
-                            <div>
-                                <h3>${index + 1}. ${c.title.toUpperCase()}</h3>
-                                <p style="color: var(--secondary-blue); font-weight:700; margin-top:5px;">Code: ${c.courseCode}</p>
-                                <p style="margin-top:10px; color:#4a5568;">${c.description || 'No module criteria provided.'}</p>
-                            </div>
-                        </div>
-                    `;
+        const res = await fetch(`${API_BASE_URL}/api/courses?role=${currentRole}&userId=${currentUserId}`);
+        
+        if (!res.ok) {
+            throw new Error("Respons daripada pelayan tidak memuaskan.");
+        }
+
+        const courses = await res.json();
+        const grid = document.getElementById('cardsLayoutContainer');
+        grid.innerHTML = '';
+        
+        if (!Array.isArray(courses) || courses.length === 0) {
+            grid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 20px; background: #f8fafc; border-radius: 8px;">
+                    <p style="color: #64748b; margin: 0; font-style: italic;">Anda belum mendaftar dalam mana-mana kursus.</p>
+                </div>`;
+            return;
+        }
+
+        courses.forEach((c, index) => {
+            grid.innerHTML += `
+                <div class="course-card" style="border-left: 4px solid #3b82f6; margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <h3 style="margin: 0; color: #1e293b;">${index + 1}. ${(c.title || 'Untitled').toUpperCase()}</h3>
+                    <p style="color: #2563eb; font-weight: bold; margin: 5px 0;">Code: ${c.courseCode}</p>
+                    <p style="margin: 5px 0 0 0; color: #475569; font-size: 14px;">${c.description || 'Tiada deskripsi disediakan.'}</p>
+                </div>
+            `;
+        });
+
+    } catch (err) {
+        console.error("Ralat Frontend:", err);
+        const container = document.getElementById('notifyMessage');
+        container.innerText = "Error sync with backend API pipeline query operations.";
+        container.style.display = 'block';
+        container.style.background = '#fee2e2';
+        container.style.color = '#991b1b';
+    }
                 });
             } catch (err) {
                 triggerAlert("Error matching layout with backend API pipeline query operations.", false);
