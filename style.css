@@ -1,550 +1,130 @@
 /* ==========================================================================
-   DOCUMENT    : style.css
-   DESIGN      : Professional Academic Corporate Blue & White UI (Fully Cleaned)
+   1. CORE VARIABLES & ARCHITECTURE SETUP
    ========================================================================== */
-
 :root {
-    /* Formal Deep Corporate Blue & Crisp White Palette */
-    --bg-main: #f1f5f9;         /* Very clean corporate slate-gray/blue tint */
-    --bg-card: #ffffff;         /* Pure white cards for maximum contrast and readability */
-    --bg-input: #ffffff;        /* Pure white for functional fields */
-    
-    /* Elegant Dark & Accent Blues */
-    --primary-blue: #1e3a8a;    /* Deep Royal Blue for principal headers and primary buttons */
-    --secondary-blue: #3b82f6;  /* Executive Slate Blue for interactions and links */
-    --nav-blue: #0f172a;        /* Professional Dark Navy Blue for administration navigation */
-    
-    /* Typography & Contrast Systems */
-    --text-main: #0f172a;       /* Dark charcoal blue-black for readable paragraphs */
-    --text-muted: #475569;      /* Slate gray for descriptions and secondary notes */
-    --border-formal: #cbd5e1;   /* Subtle light gray-blue dividers and lines */
-    
-    /* Safe Corporate Alert System Actions */
-    --accent-success: #16a34a;  /* Clean Emerald Green for success messaging / save actions */
-    --accent-danger: #dc2626;   /* Academic Crimson Red for delete / alert messaging */
-    
-    /* Subtle Corporate Drop Shadows & Sharp Flat Motion */
-    --shadow-premium: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
-    --shadow-hover: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.08);
-    --transition-smooth: all 0.2s ease-in-out;
+    --primary-blue: #0f172a;      /* Slate 900 - Primary Brand */
+    --secondary-blue: #2563eb;    /* Blue 600 - Action Callouts */
+    --hover-blue: #1d4ed8;        /* Blue 700 - Hover Interaction */
+    --bg-light: #f8fafc;          /* Slate 50 - Universal Background */
+    --text-dark: #1e293b;         /* Slate 800 - Dominant Typography */
+    --text-muted: #64748b;        /* Slate 500 - Metadata & Captions */
+    --accent-success: #10b981;    /* Emerald 500 - Success Metrics */
+    --accent-danger: #ef4444;     /* Red 500 - Destructive Actions */
+    --border-color: #e2e8f0;      /* Slate 200 - Grid / Border Dividers */
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* ==========================================================================
-   GLOBAL & COMMON STYLES
-   ========================================================================== */
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    transition: all 0.2s ease-in-out;
 }
 
 body {
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    min-height: 100vh;
+    background: var(--bg-light);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: var(--text-dark);
     line-height: 1.5;
 }
 
+/* ==========================================================================
+   2. REUSABLE SYSTEM LAYOUT CONTAINERS
+   ========================================================================== */
 .container {
     width: 92%;
     max-width: 1100px;
     margin: 40px auto;
 }
 
-/* Professional Clean Border Cards */
-.card {
-    background: var(--bg-card);
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: var(--shadow-premium);
-    border: 1px solid var(--border-formal); 
-    transition: var(--transition-smooth);
-}
-
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
-    border-color: #94a3b8;
-}
-
-/* Luxury Royal Blue Header Bar */
-.navbar {
-    background: var(--nav-blue);
-    color: #ffffff !important;
-    padding: 20px 40px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    border-bottom: 3px solid var(--primary-blue);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.navbar h2 {
-    color: #ffffff !important; 
-    font-weight: 700;
-    font-size: 22px;
-    letter-spacing: -0.3px;
-    margin: 0;
-}
-
-/* ==========================================================================
-   FORM & INPUT ELEMENTS (UPDATED FOR COMPACT WIDTH)
-   ========================================================================== */
-input, select, textarea {
-    width: 100%;
-    max-width: 400px;        /* FIXED: Keeps fields compact and formal */
-    padding: 12px 16px;
-    background: var(--bg-input); 
-    border: 1px solid var(--border-formal);
-    border-radius: 6px;
-    color: var(--text-main) !important;
-    font-size: 14px;
-    font-weight: 500;
-    transition: var(--transition-smooth);
-    box-sizing: border-box;
-    margin: 8px 0;
-    display: block;          /* Ensures structural alignment under labels */
-}
-
-input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15);
-}
-
-label {
-    display: block;
-    margin-top: 14px;
-    margin-bottom: 6px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--primary-blue);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* ==========================================================================
-   BUTTONS & LINKS
-   ========================================================================== */
-button {
-    background: var(--primary-blue);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
-    transition: var(--transition-smooth);
-    box-sizing: border-box;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-button:hover {
-    background: #1d4ed8; 
-}
-
-button:active {
-    transform: scale(0.98);
-}
-
-.logout-btn {
-    background: #475569; 
-    color: white !important;
-    text-decoration: none;
-    padding: 10px 18px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 13px;
-    transition: var(--transition-smooth);
-}
-
-.logout-btn:hover {
-    background: var(--accent-danger); 
-}
-
-.add-btn {
-    background: var(--primary-blue);
-    color: white !important;
-    text-decoration: none;
-    padding: 10px 18px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 13px;
-    transition: var(--transition-smooth);
-}
-
-.add-btn:hover {
-    background: var(--secondary-blue);
-}
-
-.back-link {
-    display: block;
-    text-align: center;
-    margin-top: 20px;
-    color: var(--primary-blue);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    transition: var(--transition-smooth);
-}
-
-.back-link:hover {
-    color: var(--secondary-blue);
-    text-decoration: underline;
-}
-
-.link {
-    text-align: center;
-    margin-top: 15px;
-    font-size: 13px;
-    color: var(--text-muted);
-}
-
-/* ==========================================================================
-   LOGIN & REGISTER SPECIFIC (CENTRALIZED BOXES)
-   ========================================================================== */
-.login-body, .register-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    background-color: #f8fafc; 
-}
-
-.login-body .box, .register-body .box {
-    background: #ffffff;
-    padding: 40px;
-    border-radius: 12px;
-    width: 380px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    border: 1px solid var(--border-formal);
-}
-
-.login-body h2, .register-body h2 {
-    text-align: center;
-    color: var(--primary-blue);
-    font-weight: 700;
-    font-size: 24px;
-    margin-bottom: 24px;
-    letter-spacing: -0.5px;
-}
-
-.login-body button, .register-body button {
-    width: 100%;
-    max-width: 100%;          /* Allows login panel buttons to span full card box width */
-    margin-top: 20px;
-    padding: 14px;
-}
-
-#matricField, #regMatricField {
-    display: none;
-}
-
-/* ==========================================================================
-   INDEX (INDEX.JSP) SPECIFIC BUTTONS
-   ========================================================================== */
-.index-card {
-    max-width: 700px;
-    margin: 40px auto;
-}
-
-.index-card button {
-    margin: 8px 0;
-}
-
-/* ==========================================================================
-   COURSE FORM & EDIT SPECIFIC
-   ========================================================================== */
-.form-card {
-    width: 450px;
-    margin: 40px auto;
-}
-
-.course-form-body, .edit-course-body {
-    background-color: var(--bg-main);
-}
-
-.course-form-card, .edit-course-card {
-    background: #ffffff;
-    width: 460px;
-    margin: 40px auto;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: var(--shadow-premium);
-    border: 1px solid var(--border-formal);
-}
-
-.edit-course-card .button-group, .course-form-card .button-group {
-    display: flex;
-    gap: 14px;
-    margin-top: 25px;
-}
-
-.edit-course-card button, .course-form-card button {
-    flex: 2;
-    background: var(--primary-blue);
-}
-
-.edit-course-back-link {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    background: #f1f5f9; 
-    color: #334155 !important;
-    padding: 12px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-    border: 1px solid var(--border-formal);
-    transition: var(--transition-smooth);
-    box-sizing: border-box;
-}
-
-.edit-course-back-link:hover {
-    background: #e2e8f0;
-}
-
-/* ==========================================================================
-   TABLES (COURSE-LIST.JSP)
-   ========================================================================== */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 25px;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid var(--border-formal);
-    box-shadow: var(--shadow-premium);
-}
-
-table th {
-    background: var(--primary-blue); 
-    color: #ffffff;      
-    padding: 16px;
-    font-weight: 600;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    text-align: left;
-}
-
-table td {
-    padding: 16px;
-    border-bottom: 1px solid var(--border-formal);
-    background: #ffffff;
-    color: var(--text-main);
-    font-size: 14px;
-    font-weight: 500;
-    vertical-align: middle;
-}
-
-table tr:last-child td {
-    border-bottom: none;
-}
-
-table tr:hover td {
-    background-color: #f8fafc; 
-}
-
-.btn-edit, .edit-btn {
-    background: #f1f5f9;
-    color: var(--primary-blue) !important;
-    text-decoration: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    display: inline-block;
-    font-weight: 600;
-    font-size: 12px;
-    border: 1px solid var(--border-formal);
-    transition: var(--transition-smooth);
-}
-
-.btn-edit:hover, .edit-btn:hover {
-    background: var(--primary-blue);
-    color: white !important;
-    border-color: var(--primary-blue);
-}
-
-.btn-delete, .delete-btn {
-    background: #ffffff;
-    color: var(--accent-danger) !important;
-    border: 1px solid #fca5a5;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: inline-block;
-    font-weight: 600;
-    font-size: 12px;
-    transition: var(--transition-smooth);
-}
-
-.btn-delete:hover, .delete-btn:hover {
-    background: var(--accent-danger);
-    color: white !important;
-    border-color: var(--accent-danger);
-}
-
-table td a, table td form {
-    display: inline-block;
-    margin-right: 6px;
-    vertical-align: middle;
-}
-
-/* ==========================================================================
-   CARDS & DASHBOARDS (LECTURER / STUDENT)
-   ========================================================================== */
-.course-card {
-    background: #ffffff;
-    padding: 20px;
-    margin-top: 15px;
-    margin-bottom: 15px;
-    border-left: 4px solid var(--primary-blue); 
-    border-radius: 6px;
-    border-top: 1px solid var(--border-formal);
-    border-right: 1px solid var(--border-formal);
-    border-bottom: 1px solid var(--border-formal);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-    transition: var(--transition-smooth);
-}
-
-.course-card:hover {
-    transform: translateX(4px);
-    border-color: var(--secondary-blue);
-    box-shadow: var(--shadow-premium);
-}
-
-.course-card h3 {
-    color: var(--primary-blue);
-    font-size: 18px;
-    margin-bottom: 6px;
-    font-weight: 600;
-}
-
-.course-card p {
-    font-size: 13px;
-    color: var(--text-muted);
-    font-weight: 500;
-}
-
-.join-btn {
-    background: var(--primary-blue);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-.join-btn:hover {
-    background: var(--secondary-blue);
-}
-
-.nav-right {
-    margin-left: auto;
-}
-
-/* ==========================================================================
-   ALERT NOTIFICATION SYSTEM
-   ========================================================================== */
-div[style*="background"] {
-    border-radius: 6px;
-    font-weight: 600;
-    box-shadow: var(--shadow-premium);
-}:root {
-    --primary-blue: #0f172a;
-    --secondary-blue: #2563eb;
-    --hover-blue: #1d4ed8;
-    --bg-light: #f8fafc;
-    --text-dark: #1e293b;
-    --text-muted: #64748b;
-    --accent-success: #10b981;
-    --accent-danger: #ef4444;
-    --border-color: #e2e8f0;
-}
-
-body {
-    background: var(--bg-light);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    color: var(--text-dark);
-}
-
 .navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     background: var(--primary-blue);
-    color: white;
-    padding: 18px 24px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    color: #ffffff;
+    padding: 16px 5%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .navbar h2 {
     margin: 0;
     font-size: 18px;
-    letter-spacing: 0.5px;
-}
-
-.container {
-    width: 90%;
-    max-width: 1000px;
-    margin: 40px auto;
+    font-weight: 700;
+    letter-spacing: 0.8px;
 }
 
 .card {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
-    margin-bottom: 30px;
+    background: #ffffff;
     border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 30px;
+    box-shadow: var(--card-shadow);
 }
 
-/* Auth Center Box Layout */
+/* ==========================================================================
+   3. AUTHENTICATION PAGES (LOGIN / REGISTER PORTAL WRAPPERS)
+   ========================================================================== */
 .login-body, .register-body {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     min-height: 100vh;
-    background: #f1f5f9;
+    background: radial-gradient(circle at top right, #1e293b, #0f172a);
+    padding: 20px;
 }
 
 .box {
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    background: #ffffff;
     width: 100%;
-    max-width: 420px;
-    border: 1px solid var(--border-color);
+    max-width: 440px;
+    padding: 40px 35px;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
 .box h2 {
-    text-align: center;
+    margin-top: 0;
+    margin-bottom: 24px;
     color: var(--primary-blue);
-    margin-bottom: 25px;
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 24px;
+    text-align: center;
+    font-weight: 800;
+    letter-spacing: -0.5px;
 }
 
-/* Form Elements */
+.box .link {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.box .link a {
+    color: var(--secondary-blue);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.box .link a:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   4. FORM ELEMENTS & CONTROLS
+   ========================================================================== */
 form label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
     font-size: 13px;
     color: var(--text-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 form input[type="text"],
@@ -553,130 +133,196 @@ form input[type="password"],
 form select,
 form textarea {
     width: 100%;
-    padding: 11px;
+    padding: 12px 14px;
     margin-bottom: 20px;
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 14px;
-    box-sizing: border-box;
-    background-color: #fff;
-    color: var(--text-dark);
-    transition: border 0.2s;
-}
-
-form input:focus, form select:focus, form textarea:focus {
-    outline: none;
-    border-color: var(--secondary-blue);
-}
-
-form button {
-    width: 100%;
-    padding: 12px;
-    background: var(--secondary-blue);
-    color: white;
-    border: none;
-    border-radius: 6px;
+    border-radius: 8px;
+    background-color: #ffffff;
     font-size: 15px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.2s;
+    color: var(--text-dark);
+    outline: none;
 }
 
-form button:hover {
+form input:focus,
+form select:focus,
+form textarea:focus {
+    border-color: var(--secondary-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+form textarea {
+    resize: vertical;
+}
+
+/* ==========================================================================
+   5. BUTTON COMPONENTS
+   ========================================================================== */
+button, .add-btn, .logout-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 12px 24px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+}
+
+/* Primary Execution Button Style */
+button[type="submit"], #saveBtn, .add-btn {
+    background: var(--secondary-blue);
+    color: #ffffff;
+}
+
+button[type="submit"]:hover, #saveBtn:hover, .add-btn:hover {
     background: var(--hover-blue);
 }
 
-/* Action Buttons Grid */
-.btn-edit, .btn-delete, .add-btn, .logout-btn, .join-btn {
-    padding: 8px 16px;
-    border: none;
-    cursor: pointer;
-    font-size: 13px;
+/* Red / Danger Action Items */
+.logout-btn, .btn-delete {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.logout-btn:hover, .btn-delete:hover {
+    background: #dc2626;
+}
+
+/* Row/Grid Specific Inline Controls */
+.btn-edit {
+    background: #f1f5f9;
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    padding: 6px 14px;
     border-radius: 6px;
-    display: inline-block;
-    text-decoration: none;
-    font-weight: 600;
-    text-align: center;
-    transition: opacity 0.2s;
 }
 
-.add-btn, .join-btn { background: var(--accent-success); color: white; }
-.logout-btn { background: #475569; color: white; }
-.btn-edit { background: var(--secondary-blue); color: white; }
-.btn-delete { background: var(--accent-danger); color: white; }
-
-.btn-edit:hover, .btn-delete:hover, .add-btn:hover, .logout-btn:hover {
-    opacity: 0.9;
+.btn-edit:hover {
+    background: #e2e8f0;
 }
 
-/* Course Layout Views */
+.btn-delete {
+    padding: 6px 14px;
+    border-radius: 6px;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 5px;
+}
+
+button:disabled {
+    background: #cbd5e1 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ==========================================================================
+   6. COURSE REPOSITORY CARDS (STUDENTS & LECTURERS)
+   ========================================================================== */
 .course-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 24px;
     margin-top: 20px;
 }
 
 .course-card {
     padding: 24px;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 12px;
     background: #ffffff;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    border-top: 4px solid var(--secondary-blue);
 }
 
-.course-card h3 { margin: 0 0 10px 0; color: var(--primary-blue); font-size: 18px; }
-.course-card p { margin: 6px 0; color: var(--text-muted); font-size: 14px; line-height: 1.5; }
+.course-card h3 {
+    margin: 0 0 8px 0;
+    color: var(--primary-blue);
+    font-size: 18px;
+    font-weight: 700;
+}
 
-/* Admin Framework Tables */
+/* ==========================================================================
+   7. ADMINISTRATIVE DATA RECORD TABLES
+   ========================================================================== */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
-}
-
-table th, table td {
-    padding: 14px;
     text-align: left;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 14px;
+    background: #ffffff;
 }
 
 table th {
-    background: #f1f5f9;
-    color: var(--primary-blue);
-    font-weight: 600;
-}
-
-table tr:hover {
     background: #f8fafc;
-}
-
-.link {
-    text-align: center;
-    margin-top: 20px;
+    color: var(--text-dark);
+    font-weight: 700;
+    padding: 14px 16px;
+    border-bottom: 2px solid var(--border-color);
     font-size: 14px;
-    color: var(--text-muted);
 }
 
-.link a {
-    color: var(--secondary-blue);
-    text-decoration: none;
-    font-weight: 600;
+table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-dark);
+    font-size: 14px;
+    vertical-align: middle;
 }
 
-.link a:hover {
-    text-decoration: underline;
+table tbody tr:last-child td {
+    border-bottom: none;
 }
 
-.button-group {
-    display: flex;
-    gap: 12px;
+table tbody tr:hover {
+    background-color: #f8fafc;
 }
 
-.button-group button {
-    width: auto;
+/* ==========================================================================
+   8. MEDIA QUERIES FOR MOBILE STACK RESPONSIVENESS
+   ========================================================================== */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+        padding: 15px;
+    }
+
+    .container {
+        width: 95%;
+        margin: 20px auto;
+    }
+
+    .card {
+        padding: 18px;
+    }
+
+    .course-grid {
+        grid-template-columns: 1fr;
+    }
+
+    table th:nth-child(1), table td:nth-child(1) {
+        display: none; /* Hide numerical index columns on small viewports */
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
 }
