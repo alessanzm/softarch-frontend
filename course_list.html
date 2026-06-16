@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Course List</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="navbar">
+    <h2>Manage Courses</h2>
+    <a href="logout" class="logout-btn">Logout</a>
+</div>
+
+<div class="container">
+
+    <div class="card">
+
+        <a href="course-form.html" class="add-btn">+ Add New Course</a>
+
+        <br><br>
+
+        <table>
+
+            <tr>
+                <th>No</th>
+                <th>Title</th>
+                <th>Code</th>
+                <th>Action</th>
+            </tr>
+
+            <tr>
+                <td>1</td>
+                <td>Software Engineering</td>
+                <td>CSF3433</td>
+                <td>
+                    <a href="edit-course.html?id=1" class="btn-edit">
+                        Edit
+                    </a>
+
+                    <button class="btn-delete"
+                            onclick="return confirm('Delete this course?')">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+
+            <tr>
+                <td>2</td>
+                <td>Database Systems</td>
+                <td>CSF3123</td>
+                <td>
+                    <a href="edit-course.html?id=2" class="btn-edit">
+                        Edit
+                    </a>
+
+                    <button class="btn-delete"
+                            onclick="return confirm('Delete this course?')">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>
