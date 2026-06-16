@@ -1,67 +1,125 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <head>
     <meta charset="UTF-8">
-    <title>Student Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal Workspace</title>
     <link rel="stylesheet" href="style.css">
+    <script src="js/config.js"></script>
 </head>
-
 <body>
 
 <div class="navbar">
-    <h2>Student Dashboard</h2>
-
-    <div class="nav-right">
-        <a href="index.html" class="logout-btn">Logout</a>
+    <h2>SMARTLEARN CORE LEARNING SPACE</h2>
+    <div>
+        <span id="userGreeting" style="color: #cbd5e1; margin-right: 15px; font-weight: 600; font-size:14px;"></span>
+        <button onclick="logout()" class="logout-btn" style="padding: 6px 12px;">Sign Out</button>
     </div>
 </div>
 
 <div class="container">
+    <div id="notifyMessage" style="display: none; padding: 12px; font-size: 14px; margin-bottom: 25px; text-align: center; border-radius: 8px; font-weight: 600;"></div>
 
-    <div class="card">
-
-        <h2>Join Course</h2>
-
-        <form action="#" method="post">
-
-            <label><strong>Course Code</strong></label>
-
-            <input type="text"
-                   name="courseCode"
-                   placeholder="Enter Course Code (e.g. BITM1113)"
-                   required>
-
-            <button type="submit" class="join-btn">
-                Join Course
-            </button>
-
+    <div class="card" style="max-width: 480px;">
+        <h2 style="color: var(--primary-blue); font-size: 18px; margin-bottom: 15px; margin-top:0;">Enroll In New Course</h2>
+        <form id="joinCourseForm">
+            <label for="enrollCourseCode">Course Code String</label>
+            <input type="text" id="enrollCourseCode" placeholder="e.g. CSF3433" style="text-transform: uppercase;" required>
+            <button type="submit" style="width: 100%;">Process Enrollment</button>
         </form>
-
     </div>
 
     <div class="card">
-
-        <h2>My Enrolled Courses</h2>
-
-        <div class="course-card">
-            <h3>1. Software Engineering</h3>
-            <p>Course Code: CSF3433</p>
+        <h2 style="color: var(--primary-blue); font-size: 20px; margin-top:0; margin-bottom: 15px;">My Enrolled Academic Core Modules</h2>
+        
+        <div id="cardsLayoutContainer" class="course-grid">
+            <p style="color: var(--text-muted); font-style:italic;">Querying active curriculum rosters...</p>
         </div>
-
-        <div class="course-card">
-            <h3>2. Database Systems</h3>
-            <p>Course Code: CSF3123</p>
-        </div>
-
-        <div class="course-card">
-            <h3>3. Web Application Development</h3>
-            <p>Course Code: CSF3203</p>
-        </div>
-
     </div>
-
 </div>
 
+<script>
+    const userId = localStorage.getItem('user_id');
+    const role = localStorage.getItem('user_role') || '';
+    const name = localStorage.getItem('user_name') || 'Guest';
+
+    if (!userId || role !== 'student') {
+        window.location.href = "login.html";
+    } else {
+        document.getElementById('userGreeting').innerText = `${name} [STUDENT]`;
+        pullStudentCatalogRoster();
+    }
+
+    function triggerAlert(message, successState = true) {
+        const container = document.getElementById('notifyMessage');
+        container.innerText = message;
+        container.style.display = 'block';
+        container.style.background = successState ? '#dcfce7' : '#fee2e2';
+        container.style.color = successState ? '#166534' : '#991b1b';
+        setTimeout(() => { container.style.display = 'none'; }, 3500);
+    }
+
+    async function pullStudentCatalogRoster() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/courses?role=${role}&userId=${userId}`);
+            if (!res.ok) throw new Error();
+            const courses = await res.json();
+
+            const grid = document.getElementById('cardsLayoutContainer');
+            grid.innerHTML = '';
+
+            if (!courses || courses.length === 0) {
+                grid.innerHTML = `<p style="color: var(--text-muted); font-style:italic; grid-column: 1/-1;">You are not currently enrolled in any academic modules.</p>`;
+                return;
+            }
+
+            courses.forEach((c, idx) => {
+                grid.innerHTML += `
+                    <div class="course-card">
+                        <div>
+                            <h3 style="margin-top:0;">${idx + 1}. ${(c.title || '').toUpperCase()}</h3>
+                            <p style="color: var(--secondary-blue); font-weight:700; margin-top:5px; margin-bottom:10px;">Code: ${c.courseCode}</p>
+                            <p style="color: #4a5568; font-size:14px; margin:0;">${c.description || 'No module specifications provided.'}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (err) {
+            triggerAlert("Exception matching curriculum connection streams.", false);
+        }
+    }
+
+    document.getElementById('joinCourseForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const codeInput = document.getElementById('enrollCourseCode');
+        
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/courses/enroll`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    studentId: parseInt(userId),
+                    courseCode: codeInput.value.trim().toUpperCase()
+                })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                triggerAlert("Enrollment tracking added cleanly!");
+                codeInput.value = '';
+                await pullStudentCatalogRoster();
+            } else {
+                triggerAlert(data.error || "Enrollment validation rejected.", false);
+            }
+        } catch (error) {
+            triggerAlert("Network loss execution failure during registration request.", false);
+        }
+    });
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = "index.html";
+    }
+</script>
 </body>
 </html>
