@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Lecturer Dashboard</title>
+
+    <style>
+        body{
+            background:#f4f6f9;
+            font-family:Arial, sans-serif;
+            margin:0;
+        }
+
+        .navbar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            background:#1e3a8a;
+            color:white;
+            padding:15px 20px;
+        }
+
+        .container{
+            width:90%;
+            max-width:900px;
+            margin:30px auto;
+        }
+
+        .card{
+            background:white;
+            padding:20px;
+            border-radius:10px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .add-btn{
+            background:#4CAF50;
+            color:white;
+            text-decoration:none;
+            padding:10px 15px;
+            border-radius:5px;
+            display:inline-block;
+        }
+
+        .logout-btn{
+            background:#2563eb;
+            color:white;
+            text-decoration:none;
+            padding:8px 12px;
+            border-radius:5px;
+        }
+
+        .course-card{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:15px;
+            border:1px solid #ddd;
+            margin-bottom:12px;
+            border-radius:8px;
+            background:#fafafa;
+        }
+
+        .course-card h3{
+            margin:0 0 5px;
+            color:#1e3a8a;
+        }
+
+        .course-card p{
+            margin:0;
+            color:#555;
+        }
+
+        .course-actions{
+            display:flex;
+            gap:10px;
+        }
+
+        .btn{
+            padding:8px 14px;
+            border:none;
+            border-radius:5px;
+            cursor:pointer;
+            text-decoration:none;
+            color:white;
+            font-size:14px;
+        }
+
+        .edit-btn{
+            background:#2196F3;
+        }
+
+        .delete-btn{
+            background:#f44336;
+        }
+
+        .edit-btn:hover,
+        .delete-btn:hover,
+        .add-btn:hover,
+        .logout-btn:hover{
+            opacity:0.9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <h2>Lecturer Dashboard</h2>
+        <a href="index.html" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="container">
+
+        <div class="card">
+
+            <h2>My Teaching Courses</h2>
+
+            <a href="course-form.html" class="add-btn">+ Add Course</a>
+
+            <br><br>
+
+            <div class="course-card">
+                <div>
+                    <h3>1. Software Engineering</h3>
+                    <p>Course Code: CSF3433</p>
+                </div>
+
+                <div class="course-actions">
+                    <a href="edit-course.html?id=1" class="btn edit-btn">
+                        Edit
+                    </a>
+
+                    <button class="btn delete-btn"
+                            onclick="return confirm('Delete this course?')">
+                        Delete
+                    </button>
+                </div>
+            </div>
+
+            <div class="course-card">
+                <div>
+                    <h3>2. Database Systems</h3>
+                    <p>Course Code: CSF3123</p>
+                </div>
+
+                <div class="course-actions">
+                    <a href="edit-course.html?id=2" class="btn edit-btn">
+                        Edit
+                    </a>
+
+                    <button class="btn delete-btn"
+                            onclick="return confirm('Delete this course?')">
+                        Delete
+                    </button>
+                </div>
+            </div>
+
+            <div class="course-card">
+                <div>
+                    <h3>3. Web Application Development</h3>
+                    <p>Course Code: CSF3203</p>
+                </div>
+
+                <div class="course-actions">
+                    <a href="edit-course.html?id=3" class="btn edit-btn">
+                        Edit
+                    </a>
+
+                    <button class="btn delete-btn"
+                            onclick="return confirm('Delete this course?')">
+                        Delete
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
