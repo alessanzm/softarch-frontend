@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Course</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="course-form-body">
+
+<div class="navbar">
+    <h2>Create Course</h2>
+</div>
+
+<div class="container">
+    <div class="course-form-card">
+
+        <form action="/CourseServlet" method="post">
+
+            <input type="hidden" name="action" value="create">
+
+            <label for="title">Course Title</label>
+            <input type="text" id="title" name="title" required>
+
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="5" required></textarea>
+
+            <label for="courseCode">Course Code</label>
+            <input type="text" id="courseCode" name="courseCode" placeholder="CSF3433" required>
+
+            <div class="button-group">
+                <button type="submit">Create Course</button>
+                <a href="course-list.html" class="edit-course-back-link">Back to List</a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>
