@@ -1,4 +1,143 @@
 <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Register - SMARTLEARN</title>
+
+    <style>
+        body{
+            margin:0;
+            font-family:Arial, sans-serif;
+            background:#f4f6f9;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+        }
+
+        .box{
+            background:white;
+            padding:30px;
+            width:350px;
+            border-radius:10px;
+            box-shadow:0 2px 10px rgba(0,0,0,0.1);
+            text-align:center;
+        }
+
+        h2{
+            color:#1e3a8a;
+            margin-bottom:20px;
+        }
+
+        select,
+        input{
+            width:100%;
+            padding:12px;
+            margin:8px 0;
+            border:1px solid #ccc;
+            border-radius:5px;
+            box-sizing:border-box;
+        }
+
+        button{
+            width:100%;
+            padding:12px;
+            background:#16a34a;
+            color:white;
+            border:none;
+            border-radius:5px;
+            cursor:pointer;
+            margin-top:10px;
+        }
+
+        button:hover{
+            background:#15803d;
+        }
+
+        .link{
+            margin-top:15px;
+            font-size:14px;
+        }
+
+        .link a{
+            color:#2563eb;
+            text-decoration:none;
+        }
+
+        #regMatricField{
+            display:none;
+        }
+    </style>
+
+    <script>
+        function toggleRegisterRole() {
+            const roleSelect = document.getElementById("regRole");
+            const matricField = document.getElementById("regMatricField");
+            const matricInput = document.getElementById("regMatricNo");
+
+            if (roleSelect.value === "student") {
+                matricField.style.display = "block";
+                matricInput.required = true;
+            } else {
+                matricField.style.display = "none";
+                matricInput.required = false;
+                matricInput.value = "";
+            }
+        }
+    </script>
+
+</head>
+
+<body>
+
+<div class="box">
+
+    <h2>CREATE ACCOUNT</h2>
+
+    <form action="#" method="post">
+
+        <select name="role" id="regRole" onchange="toggleRegisterRole()" required>
+            <option value="" disabled selected>-- Register As --</option>
+            <option value="student">Student</option>
+            <option value="lecturer">Lecturer</option>
+            <option value="admin">Admin</option>
+        </select>
+
+        <div id="regMatricField">
+            <input type="text"
+                   name="matricNo"
+                   id="regMatricNo"
+                   placeholder="Matric Number">
+        </div>
+
+        <input type="text"
+               name="name"
+               placeholder="Full Name"
+               required>
+
+        <input type="email"
+               name="email"
+               placeholder="Email"
+               required>
+
+        <input type="password"
+               name="password"
+               placeholder="Password"
+               required>
+
+        <button type="submit">Register</button>
+
+    </form>
+
+    <div class="link">
+        Already have an account?
+        <a href="Login.html">Login</a>
+    </div>
+
+</div>
+
+</body>
+</html><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
