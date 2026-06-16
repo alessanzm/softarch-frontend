@@ -1,41 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Create Course</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Course Module</title>
     <link rel="stylesheet" href="style.css">
+    <script src="js/config.js"></script>
 </head>
-
-<body class="course-form-body">
+<body>
 
 <div class="navbar">
-    <h2>Create Course</h2>
-</div>
-
-<div class="container">
-    <div class="course-form-card">
-
-        <form action="/CourseServlet" method="post">
-
-            <input type="hidden" name="action" value="create">
-
-            <label for="title">Course Title</label>
-            <input type="text" id="title" name="title" required>
-
-            <label for="description">Description</label>
-            <textarea id="description" name="description" rows="5" required></textarea>
-
-            <label for="courseCode">Course Code</label>
-            <input type="text" id="courseCode" name="courseCode" placeholder="CSF3433" required>
-
-            <div class="button-group">
-                <button type="submit">Create Course</button>
-                <a href="course_list.html" class="edit-course-back-link">Back to List</a>
-            </div>
-
-        </form>
-
+    <h2>SMARTLEARN MASTER WORKSPACE</h2>
+    <div>
+        <span id="userGreeting" style="color: #cbd5e1; margin-right: 15px; font-weight: 600; font-size:14px;"></span>
     </div>
 </div>
 
+<div class="container" style="max-width: 600px;">
+    <div id="notifyMessage" style="display: none; padding: 12px; font-size: 14px; margin-bottom: 25px; text-align: center; border-radius: 8px; font-weight: 600;"></div>
+
+    <div class="card">
+        <h3 style="color: var(--primary-blue); margin-top:0; margin-bottom: 20px;">Add New Academic Course Module</h3>
+        
+        <form id="createCourseForm">
+            <label for="courseCode">Unique Course Code</label>
+            <input type="text" id="courseCode" placeholder="e.g. CSF3433" required>
+
+            <label for="title">Course Title Designator</label>
+            <input type="text" id="title" placeholder="e.g. Software Engineering Frameworks" required>
+
+            <label for="description">Syllabus Course Specifications / Description</label>
+            <textarea id="description" rows="5" placeholder="Enter course summaries..." required></textarea>
+
+            <div class="button-group">
+                <button type="submit" id="saveBtn">Commit Data Record</button>
+                <a href="course_list.html" class="logout-btn" style="text-decoration: none;">Cancel Operation</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const userId = localStorage.getItem('user_id');
+    const role = localStorage.getItem('user_role') || '';
+    const name = localStorage.getItem('user_name') || 'Guest';
+
+    // Access block control for unauthenticated entities
+    if (!userId || (role !== 'admin' && role !== 'lecturer')) {
+        window.location.href = "login.html";
+    } else {
+        document.getElementById('userGreeting').innerText = `${name} [${role.toUpperCase()}]`;
+    }
+
+    function triggerAlert(message, successState = true) {
+        const container = document.getElementById('notifyMessage');
+        container.innerText = message;
+        container.style.display = 'block';
+        container.style.background = successState ? '#dcfce7' : '#fee2e2';
+        container.style.color = successState ? '#166534' : '#991b1b';
+        setTimeout(() => { container.style.display = 'none'; }, 3500);
+    }
+
+    document.getElementById('createCourseForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('saveBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Processing Transmissions...";
+
+        const payload = {
+            courseCode: document.getElementById('courseCode').value.trim().toUpperCase(),
+            title: document.getElementById('title').value.trim(),
+            description: document.getElementById('description').value.trim(),
+            lecturerId: role === 'lecturer' ? parseInt(userId) : null,
+            role: role
+        };
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/courses`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                triggerAlert("Course module successfully created!");
+                setTimeout(() => {
+                    window.location.href = role === 'admin' ? "course_list.html" : "dashboard.html";
+                }, 1000);
+            } else {
+                triggerAlert(data.error || "Error executing database mapping logic.", false);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Commit Data Record";
+            }
+        } catch (err) {
+            triggerAlert("Network pipeline framework anomaly detected.", false);
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Commit Data Record";
+        }
+    });
+</script>
 </body>
 </html>
