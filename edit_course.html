@@ -1,44 +1,120 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Edit Course</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modify Core Parameters</title>
     <link rel="stylesheet" href="style.css">
+    <script src="js/config.js"></script>
 </head>
-
-<body class="edit-course-body">
+<body>
 
 <div class="navbar">
-    <h2>Edit Course</h2>
-</div>
-
-<div class="container">
-    <div class="edit-course-card">
-
-        <form action="/CourseServlet" method="post">
-
-            <input type="hidden" name="action" value="update">
-            <input type="hidden" name="courseId" value="1">
-
-            <label>Title</label>
-            <input type="text" name="title" value="Software Engineering" required>
-
-            <label>Description</label>
-            <textarea name="description" rows="5" required>
-Introduction to Software Engineering concepts.
-            </textarea>
-
-            <label>Course Code</label>
-            <input type="text" name="courseCode" value="CSF3433" required>
-
-            <div class="button-group">
-                <button type="submit">Update Course</button>
-                <a href="course_list.html" class="edit-course-back-link">Cancel</a>
-            </div>
-
-        </form>
-
+    <h2>SMARTLEARN MANAGEMENT SYSTEM</h2>
+    <div>
+        <span id="userGreeting" style="color: #cbd5e1; margin-right: 15px; font-weight: 600; font-size:14px;"></span>
     </div>
 </div>
 
+<div class="container" style="max-width: 600px;">
+    <div id="notifyMessage" style="display: none; padding: 12px; font-size: 14px; margin-bottom: 25px; text-align: center; border-radius: 8px; font-weight: 600;"></div>
+
+    <div class="card">
+        <h3 style="color: var(--primary-blue); margin-top:0; margin-bottom: 20px;">Modify Existing Course Module Architecture Mapping</h3>
+        
+        <form id="editCourseForm">
+            <label for="courseCode">Unique Course Code</label>
+            <input type="text" id="courseCode" required>
+
+            <label for="title">Course Title Designator</label>
+            <input type="text" id="title" required>
+
+            <label for="description">Syllabus Course Specifications / Description</label>
+            <textarea id="description" rows="5" required></textarea>
+
+            <div class="button-group">
+                <button type="submit" id="saveBtn">Update Data Record</button>
+                <button type="button" class="logout-btn" onclick="abortRouting()">Abort Modifications</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const userId = localStorage.getItem('user_id');
+    const role = localStorage.getItem('user_role') || '';
+    const name = localStorage.getItem('user_name') || 'Guest';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetCourseId = urlParams.get('id');
+
+    if (!userId || !targetCourseId || (role !== 'admin' && role !== 'lecturer')) {
+        abortRouting();
+    } else {
+        document.getElementById('userGreeting').innerText = `${name} [${role.toUpperCase()}]`;
+        fetchModuleTargetRecord();
+    }
+
+    function triggerAlert(message, successState = true) {
+        const container = document.getElementById('notifyMessage');
+        container.innerText = message;
+        container.style.display = 'block';
+        container.style.background = successState ? '#dcfce7' : '#fee2e2';
+        container.style.color = successState ? '#166534' : '#991b1b';
+        setTimeout(() => { container.style.display = 'none'; }, 3500);
+    }
+
+    async function fetchModuleTargetRecord() {
+        try {
+            // Queries current existing metadata from the server to pre-fill standard form fields
+            const res = await fetch(`${API_BASE_URL}/api/courses/single?id=${targetCourseId}`);
+            if (!res.ok) throw new Error();
+            const course = await res.json();
+            
+            document.getElementById('courseCode').value = course.courseCode || '';
+            document.getElementById('title').value = course.title || '';
+            document.getElementById('description').value = course.description || '';
+        } catch (err) {
+            triggerAlert("Error matching layout mapping data parameters.", false);
+        }
+    }
+
+    document.getElementById('editCourseForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+
+        const payload = {
+            courseCode: document.getElementById('courseCode').value.trim().toUpperCase(),
+            title: document.getElementById('title').value.trim(),
+            description: document.getElementById('description').value.trim(),
+            role: role
+        };
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/courses/${targetCourseId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                triggerAlert("Changes saved successfully!");
+                setTimeout(() => { abortRouting(); }, 1200);
+            } else {
+                triggerAlert(data.error || "Update sequence was rejected.", false);
+                saveBtn.disabled = false;
+            }
+        } catch (err) {
+            triggerAlert("Network interaction processing block failure.", false);
+            saveBtn.disabled = false;
+        }
+    });
+
+    function abortRouting() {
+        window.location.href = role === 'admin' ? "course_list.html" : "dashboard.html";
+    }
+</script>
 </body>
 </html>
