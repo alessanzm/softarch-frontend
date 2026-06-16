@@ -1,71 +1,128 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Course List</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Catalog Management</title>
     <link rel="stylesheet" href="style.css">
+    <script src="js/config.js"></script>
 </head>
-
 <body>
 
 <div class="navbar">
-    <h2>Manage Courses</h2>
-    <a href="logout" class="logout-btn">Logout</a>
+    <h2>SMARTLEARN ADMIN PORTAL</h2>
+    <div>
+        <span id="userGreeting" style="color: #cbd5e1; margin-right: 15px; font-weight: 600; font-size:14px;"></span>
+        <button onclick="logout()" class="logout-btn" style="padding: 6px 12px;">Sign Out</button>
+    </div>
 </div>
 
 <div class="container">
+    <div id="notifyMessage" style="display: none; padding: 12px; font-size: 14px; margin-bottom: 25px; text-align: center; border-radius: 8px; font-weight: 600;"></div>
 
     <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: var(--primary-blue); margin: 0; font-size: 20px;">Global System Catalog Index</h2>
+            <a href="course_form.html" class="add-btn" style="text-decoration: none;">+ Add New Course</a>
+        </div>
 
-        <a href="course_form.html" class="add-btn">+ Add New Course</a>
-
-        <br><br>
-
-        <table>
-
-            <tr>
-                <th>No</th>
-                <th>Title</th>
-                <th>Code</th>
-                <th>Action</th>
-            </tr>
-
-            <tr>
-                <td>1</td>
-                <td>Software Engineering</td>
-                <td>CSF3433</td>
-                <td>
-                    <a href="edit_course.html?id=1" class="btn-edit">
-                        Edit
-                    </a>
-
-                    <button class="btn-delete"
-                            onclick="return confirm('Delete this course?')">
-                        Delete
-                    </button>
-                </td>
-            </tr>
-
-            <tr>
-                <td>2</td>
-                <td>Database Systems</td>
-                <td>CSF3123</td>
-                <td>
-                    <a href="edit_course.html?id=2" class="btn-edit">
-                        Edit
-                    </a>
-
-                    <button class="btn-delete"
-                            onclick="return confirm('Delete this course?')">
-                        Delete
-                    </button>
-                </td>
-            </tr>
-
-        </table>
-
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Index</th>
+                        <th>Course Title Description</th>
+                        <th>Subject Code</th>
+                        <th style="width: 180px; text-align: center;">Administrative Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="coursesTableBody">
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-muted);">Initialing system catalog links...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-
 </div>
 
+<script>
+    const userId = localStorage.getItem('user_id');
+    const role = localStorage.getItem('user_role') || '';
+    const name = localStorage.getItem('user_name') || 'Guest';
+
+    if (!userId || role !== 'admin') {
+        window.location.href = "login.html";
+    } else {
+        document.getElementById('userGreeting').innerText = `${name} [${role.toUpperCase()}]`;
+        pullDirectoryData();
+    }
+
+    function triggerAlert(message, successState = true) {
+        const container = document.getElementById('notifyMessage');
+        container.innerText = message;
+        container.style.display = 'block';
+        container.style.background = successState ? '#dcfce7' : '#fee2e2';
+        container.style.color = successState ? '#166534' : '#991b1b';
+        setTimeout(() => { container.style.display = 'none'; }, 3500);
+    }
+
+    async function pullDirectoryData() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/courses?role=${role}&userId=${userId}`);
+            if (!res.ok) throw new Error("API failure.");
+            const courses = await res.json();
+            
+            const tbody = document.getElementById('coursesTableBody');
+            tbody.innerHTML = '';
+
+            if (!courses || courses.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Database architecture repository collection empty.</td></tr>`;
+                return;
+            }
+
+            courses.forEach((c, idx) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td><strong>${(c.title || '').toUpperCase()}</strong><br><small style="color:#718096;">${c.description || 'No criteria.'}</small></td>
+                        <td><code>${c.courseCode}</code></td>
+                        <td style="text-align: center;">
+                            <a href="edit_course.html?id=${c.courseId}" class="btn-edit" style="text-decoration: none; margin-right: 4px;">Edit</a>
+                            <button class="btn-delete" onclick="dropCourseEntry(${c.courseId})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (err) {
+            triggerAlert("Could not parse synchronization tables with data channels.", false);
+        }
+    }
+
+    async function dropCourseEntry(courseId) {
+        if (!confirm("Are you sure you want to permanently delete this course row entry?")) return;
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role: role })
+            });
+            if (res.ok) {
+                await pullDirectoryData();
+                triggerAlert("Course module mapping sequence executed out cleanly.");
+            } else {
+                const data = await res.json();
+                triggerAlert(data.error || "Deletion parameters mismatched.", false);
+            }
+        } catch (error) {
+            triggerAlert("Communication loss processing drop metrics.", false);
+        }
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = "index.html";
+    }
+</script>
 </body>
 </html>
