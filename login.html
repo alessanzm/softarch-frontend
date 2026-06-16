@@ -3,99 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Sign In</title>
+    <title>SmartLearn | Secure Login Gateway</title>
     <link rel="stylesheet" href="style.css">
-    <script src="config.js"></script>
-    <script>
-        function checkRoleInput() {
-            const role = document.getElementById("loginRole").value;
-            const matricField = document.getElementById("matricField");
-            const matricNo = document.getElementById("matricNo");
-            
-            if (role === "student") {
-                matricField.style.display = "block";
-                matricNo.required = true;
-            } else {
-                matricField.style.display = "none";
-                matricNo.required = false;
-                matricNo.value = ""; // Clear out if switching roles
-            }
-        }
-    </script>
+    <script src="config.js"></script> 
 </head>
-<body class="login-body">
-    <div class="box">
-        <h2>SYSTEM LOGIN</h2>
-        <div id="errBox" style="display: none; background: #fee2e2; color: #ef4444; padding: 10px; border-radius: 6px; font-size: 13px; text-align: center; margin-bottom: 20px; font-weight: 600; border: 1px solid #fca5a5;"></div>
+<body>
+    <div class="container" style="max-width: 400px; margin-top: 100px;">
+        <div class="card">
+            <h2 style="color: #2563eb; text-align: center; margin-bottom: 20px;">SMARTLEARN LOGIN</h2>
+            <div id="loginAlert" style="display: none; padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 14px; text-align: center;"></div>
+            
+            <form id="loginForm">
+                <label for="loginRole">System Role Access</label>
+                <select id="loginRole" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px;" required>
+                    <option value="">-- Choose Access Role --</option>
+                    <option value="admin">System Administrator</option>
+                    <option value="lecturer">Academic Lecturer</option>
+                    <option value="student">Registered Student</option>
+                </select>
 
-        <form id="loginForm">
-            <label for="loginRole">System Role Access</label>
-            <select id="loginRole" onchange="checkRoleInput()" required>
-                <option value="" disabled selected>-- Select Role --</option>
-                <option value="student">Student</option>
-                <option value="lecturer">Lecturer</option>
-                <option value="admin">Administrator</option>
-            </select>
+                <label for="loginEmail">Secure Email Address</label>
+                <input type="email" id="loginEmail" placeholder="name@domain.com" required style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px;">
 
-            <div id="matricField" style="display: none;">
-                <label for="matricNo">Matric Number</label>
-                <input type="text" id="matricNo" placeholder="e.g. B032210099" style="text-transform: uppercase;">
-            </div>
+                <label for="loginPassword">Account Password</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" required style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #cbd5e1; border-radius: 4px;">
 
-            <label for="loginEmail">Account Email</label>
-            <input type="email" id="loginEmail" placeholder="name@domain.com" required>
-
-            <label for="loginPassword">Secure Password</label>
-            <input type="password" id="loginPassword" placeholder="••••••••" required>
-
-            <button type="submit" id="submitBtn">Authenticate</button>
-        </form>
-        <p class="link">Need an account? <a href="register.html">Sign up here</a></p>
+                <button type="submit" style="width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">Authenticate Account</button>
+            </form>
+        </div>
     </div>
 
     <script>
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const errBox = document.getElementById('errBox');
-            const submitBtn = document.getElementById('submitBtn');
-            
-            errBox.style.display = 'none';
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Verifying...";
-
-            const payload = {
-                role: document.getElementById('loginRole').value,
-                email: document.getElementById('loginEmail').value.trim().toLowerCase(),
-                password: document.getElementById('loginPassword').value,
-                matricNo: document.getElementById('matricNo').value ? document.getElementById('matricNo').value.trim().toUpperCase() : null
-            };
+            const alertBox = document.getElementById('loginAlert');
+            const role = document.getElementById('loginRole').value;
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
 
             try {
-                const res = await fetch(`${API_BASE_URL}/api/login`, {
+                const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ email, password, role })
                 });
+
                 const data = await res.json();
 
-             if (res.ok) {
-                    localStorage.setItem('user_id', data.user_id || data.userId);
-                    localStorage.setItem('user_name', data.user_name || data.name);
-                    localStorage.setItem('user_role', data.user_role || data.role);
-                    
-                    window.location.href = "index.html";
+                if (res.ok) {
+                    // Simpan data sesi penting ke localStorage
+                    localStorage.setItem('user_id', data.user.id || data.user.userId || data.user._id);
+                    localStorage.setItem('user_role', role);
+                    localStorage.setItem('user_name', data.user.name || data.user.fullName || 'User');
+
+                    alertBox.style.display = 'block';
+                    alertBox.style.background = '#dcfce7';
+                    alertBox.style.color = '#166534';
+                    alertBox.style.innerText = "Authentication successful! Redirecting...";
+
+                    // Halau pengguna mengikut peranan (Role-based Routing)
+                    setTimeout(() => {
+                        if (role === 'admin') window.location.href = "admin_dashboard.html";
+                        else if (role === 'lecturer') window.location.href = "lecturer_dashboard.html";
+                        else if (role === 'student') window.location.href = "student_dashboard.html";
+                    }, 1000);
                 } else {
-                    errBox.innerText = data.error || "Authentication rejected. Please check your credentials.";
-                    errBox.style.display = 'block';
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "Authenticate";
+                    alertBox.style.display = 'block';
+                    alertBox.style.background = '#fee2e2';
+                    alertBox.style.color = '#991b1b';
+                    alertBox.innerText = data.error || "Invalid credentials or unauthorized role connection.";
                 }
-            
             } catch (err) {
-                errBox.innerText = "Unable to establish communication with the authorization server.";
-                errBox.style.display = 'block';
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Authenticate";
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#fee2e2';
+                alertBox.style.color = '#991b1b';
+                alertBox.innerText = "Failed to link with authentication API server pipeline.";
             }
         });
     </script>
