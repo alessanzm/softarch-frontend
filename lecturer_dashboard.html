@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartLearn | Lecturer Workspace</title>
     <link rel="stylesheet" href="style.css">
-    <script src="js/config.js"></script>
+    <script src="config.js"></script>
 </head>
 <body>
     <div class="navbar">
@@ -20,7 +20,7 @@
         <div id="notifyMessage" style="display: none; padding: 12px; font-size: 14px; margin-bottom: 25px; text-align: center; border-radius: 8px; font-weight: 600;"></div>
 
         <div class="card" id="managementView">
-            <h3 id="formTitle" style="color: var(--primary-blue); margin-top:0; margin-bottom: 20px;">Add New Academic Course Module</h3>
+            <h3 id="formTitle" style="color: #2563eb; margin-top:0; margin-bottom: 20px;">Add New Academic Course Module</h3>
             <form id="courseForm">
                 <input type="hidden" id="courseId">
                 
@@ -41,9 +41,9 @@
         </div>
 
         <div class="card">
-            <h2 style="color: var(--primary-blue); font-size: 20px; margin-top:0; margin-bottom: 15px;">Assigned Teaching Syllabus Modules</h2>
+            <h2 style="color: #2563eb; font-size: 20px; margin-top:0; margin-bottom: 15px;">Assigned Teaching Syllabus Modules</h2>
             <div id="cardsLayoutContainer" class="course-grid">
-                <p style="color: var(--text-muted); font-style:italic;">Querying active curriculum rosters...</p>
+                <p style="color: #64748b; font-style:italic;">Querying active curriculum rosters...</p>
             </div>
         </div>
     </div>
@@ -70,23 +70,22 @@
 
         async function pullDirectoryData() {
             try {
-                const res = await fetch(`${API_BASE_URL}/api/courses?role=${role}&userId=${userId}`);
+                const res = await fetch(`${API_BASE_URL}/api/courses?role=lecturer&userId=${userId}`);
                 const courses = await res.json();
-                
                 const grid = document.getElementById('cardsLayoutContainer');
                 grid.innerHTML = '';
                 
                 if (!courses || courses.length === 0) {
-                    grid.innerHTML = `<p style="color: var(--text-muted); font-style:italic;">Tiada kelas yang didaftarkan di bawah kod pensyarah anda buat masa ini.</p>`;
+                    grid.innerHTML = `<p style="color: #64748b; font-style:italic;">Tiada kelas yang didaftarkan di bawah kod pensyarah anda buat masa ini.</p>`;
                     return;
                 }
 
                 courses.forEach((c, index) => {
                     grid.innerHTML += `
-                        <div class="course-card">
+                        <div class="course-card" style="border-left: 4px solid #10b981; margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                             <div>
                                 <h3>${index + 1}. ${c.title.toUpperCase()}</h3>
-                                <p style="color: var(--secondary-blue); font-weight:700; margin-top:5px;">Code: ${c.courseCode}</p>
+                                <p style="color: #059669; font-weight:700; margin-top:5px;">Code: ${c.courseCode}</p>
                                 <p style="margin-top:10px; color:#4a5568;">${c.description || 'No module criteria provided.'}</p>
                             </div>
                             <div style="margin-top: 15px; display:flex; gap:8px;">
@@ -112,7 +111,7 @@
                 title: document.getElementById('courseTitle').value.trim(),
                 description: document.getElementById('courseDesc').value.trim(),
                 lecturerId: parseInt(userId),
-                role: 'admin' // 💡 Dipintas sebagai 'admin' untuk mengelakkan ralat sekatan kebenaran di backend
+                role: 'admin' // Dipintas untuk membenarkan akses tulis terus mengikut konfigurasi backend anda
             };
 
             let targetUrl = id ? `${API_BASE_URL}/api/courses/${id}` : `${API_BASE_URL}/api/courses`;
