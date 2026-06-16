@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SMARTLEARN Gateway</title>
     <link rel="stylesheet" href="style.css">
-    <script src="config.js"></script>
+    <script src="js/config.js"></script>
 </head>
 <body>
 
@@ -33,21 +33,23 @@
         const subtext = document.getElementById('welcomeSubtext');
         const actions = document.getElementById('actionControls');
 
-        if (!userId) {
+        // Check for complete session credentials to avoid broken states
+        if (!userId || !role) {
+            localStorage.clear(); // Safety wipe if partially authenticated
             navAuth.innerHTML = `<a href="login.html" class="add-btn">Sign In</a>`;
             header.innerText = "Welcome to SMARTLEARN";
             actions.innerHTML = `
                 <a href="login.html" class="add-btn" style="padding: 12px 30px;">Sign Into System</a>
-                <a href="register.html" class="logout-btn" style="padding: 12px 30px;">Create Account</a>
+                <a href="register.html" class="logout-btn" style="padding: 12px 30px; background-color: #64748b;">Create Account</a>
             `;
         } else {
             navAuth.innerHTML = `
-                <span style="color: #cbd5e1; margin-right: 15px; font-size:14px;">Hi, ${name}!</span>
+                <span style="color: #cbd5e1; margin-right: 15px; font-size:14px; font-weight: 600;">Hi, ${name}!</span>
                 <button onclick="logout()" class="logout-btn" style="padding: 6px 12px;">Sign Out</button>
             `;
             header.innerText = `Welcome back, ${name}`;
             subtext.innerText = `You are logged in with the secure role authority level: [${role.toUpperCase()}].`;
-            actions.innerHTML = `<a href="dashboard.html" class="add-btn" style="padding: 12px 30px;">Open Dashboard Workspace</a>`;
+            actions.innerHTML = `<a href="dashboard.html" class="add-btn" style="padding: 12px 30px; background: var(--secondary-blue);">Open Dashboard Workspace</a>`;
         }
 
         function logout() {
