@@ -38,7 +38,6 @@
             </div>
         </div>
         
-        <div id="cardsLayoutContainer" style="margin-top: 20px;"></div>
     </div>
 
     <script>
@@ -163,7 +162,6 @@
                     triggerAlert("Enrollment tracking added cleanly!");
                     document.getElementById('enrollCourseCode').value = '';
                     fetchEnrolledCourses();
-                    await pullDirectoryData();
                 } else {
                     triggerAlert(data.error || "Enrollment process exception.", false);
                     fetchEnrolledCourses();
@@ -178,7 +176,6 @@
             window.location.href = "login.html";
         }
 
-        pullDirectoryData();
         fetchEnrolledCourses();
     </script>
 </body>
