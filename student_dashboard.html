@@ -59,7 +59,7 @@
             if (!container) return; 
 
             try {
-                const res = await fetch(`${API_BASE_URL}/api/courses/enrolled?userId=${currentStudentId}`);
+                const res = await fetch(`${API_BASE_URL}/api/courses?role=student&userId=${currentStudentId}`);
                 
                 if (!res.ok) throw new Error("Gagal berkomunikasi dengan pelayan fail.");
                 
