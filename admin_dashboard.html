@@ -155,24 +155,21 @@
                 return;
             }
             
-            // Membina struktur payload utama
             const payload = {
                 courseCode: document.getElementById('courseCode').value.trim().toUpperCase(),
                 title: document.getElementById('courseTitle').value.trim(),
                 description: document.getElementById('courseDesc').value.trim(),
-                lecturerId: isNaN(dropVal) ? dropVal.trim() : parseInt(dropVal),
+                lecturerId: String(dropVal).trim(), // Dipaksa jadi String tulen sepadan schema
                 role: 'admin'
             };
 
-            // DIBAIKI: Jika dalam operasi EDIT, bekalkan rujukan ID secara terus di dalam JSON payload
-            if (id) {
-                payload.id = id;
-                payload._id = id;
-                payload.courseId = id;
-            }
-
             let targetUrl = id ? `${API_BASE_URL}/api/courses/${id}` : `${API_BASE_URL}/api/courses`;
             let targetMethod = id ? 'PUT' : 'POST';
+
+            if (id) {
+                payload.courseId = id; 
+                targetUrl = `${API_BASE_URL}/api/courses/${id}?id=${id}`;
+            }
 
             try {
                 const res = await fetch(targetUrl, {
@@ -181,14 +178,14 @@
                     body: JSON.stringify(payload)
                 });
                 
-                if (res.ok) {
+                const data = await res.json();
+                
+                if (res.ok || data.success) {
                     clearFormState();
-                    await pullDirectoryData();
+                    await pullDirectoryData(); // Tarik semula data baharu ke jadual
                     triggerAlert(id ? "Course mapping data updated successfully!" : "Course mapping data committed successfully!");
                 } else {
-                    const data = await res.json();
-                    // JIKA GAGAL: Paparkan ralat sebenar daripada backend (bukan hijack status jadi hijau)
-                    triggerAlert(data.error || "Error executing model layout query logic.", false);
+                    triggerAlert(data.error || data.message || "Backend rejected the layout logic query update.", false);
                 }
             } catch (err) {
                 triggerAlert("Network communications structural anomaly detected.", false);
