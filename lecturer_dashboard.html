@@ -81,6 +81,11 @@
                 }
 
                 courses.forEach((c, index) => {
+                    // Membersihkan tanda petikan tunggal/kembar supaya tidak merosakkan fungsi onclick HTML
+                    const safeDesc = c.description ? c.description.replace(/'/g, "\\'").replace(/"/g, '\\"') : '';
+                    const safeTitle = c.title ? c.title.replace(/'/g, "\\'").replace(/"/g, '\\"') : '';
+
+                    // KEMASKINI KETAT: Memastikan c._id (huruf kecil) digunakan pada setEditMode dan dropCourseEntry
                     grid.innerHTML += `
                         <div class="course-card" style="border-left: 4px solid #10b981; margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                             <div>
@@ -89,8 +94,8 @@
                                 <p style="margin-top:10px; color:#4a5568;">${c.description || 'No module criteria provided.'}</p>
                             </div>
                             <div style="margin-top: 15px; display:flex; gap:8px;">
-                                <button class="btn-edit" style="flex:1;" onclick="setEditMode(${c._Id}, '${c.courseCode}', '${c.title}', '${c.description || ''}')">Edit</button>
-                                <button class="btn-delete" style="flex:1;" onclick="dropCourseEntry(${c._Id})">Drop</button>
+                                <button class="btn-edit" style="flex:1;" onclick="setEditMode('${c._id}', '${c.courseCode}', '${safeTitle}', '${safeDesc}')">Edit</button>
+                                <button class="btn-delete" style="flex:1;" onclick="dropCourseEntry('${c._id}')">Drop</button>
                             </div>
                         </div>
                     `;
@@ -111,7 +116,7 @@
                 title: document.getElementById('courseTitle').value.trim(),
                 description: document.getElementById('courseDesc').value.trim(),
                 lecturerId: userId,
-                role: 'admin' // Dipintas untuk membenarkan akses tulis terus mengikut konfigurasi backend anda
+                role: 'admin' 
             };
 
             let targetUrl = id ? `${API_BASE_URL}/api/courses/${id}` : `${API_BASE_URL}/api/courses`;
@@ -126,7 +131,7 @@
                 if (res.ok) {
                     clearFormState();
                     await pullDirectoryData();
-                    triggerAlert("Course successfully updated!");
+                    triggerAlert(id ? "Course successfully updated!" : "Course successfully created!");
                 } else {
                     const data = await res.json();
                     triggerAlert(data.error || "Ralat memproses transaksi.", false);
@@ -139,7 +144,13 @@
         });
 
         async function dropCourseEntry(courseId) {
-            if (!confirm("Are you sure?")) return;
+            if (!courseId || courseId === 'undefined') {
+                triggerAlert("Ralat: ID Kursus tidak sah atau tidak ditemui.", false);
+                return;
+            }
+
+            if (!confirm("Are you sure you want to permanently delete this course?")) return;
+            
             try {
                 const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}`, {
                     method: 'DELETE',
@@ -149,6 +160,9 @@
                 if (res.ok) {
                     await pullDirectoryData();
                     triggerAlert("Course successfully deleted.");
+                } else {
+                    const data = await res.json();
+                    triggerAlert(data.error || "Gagal memadam kursus.", false);
                 }
             } catch (error) {
                 triggerAlert("Ralat memadam data.", false);
@@ -162,6 +176,7 @@
             document.getElementById('courseDesc').value = desc;
             document.getElementById('formTitle').innerText = "Modify Existing Course Module Architecture Mapping";
             document.getElementById('cancelBtn').style.display = 'inline-block';
+            document.getElementById('saveBtn').innerText = "Update Data Record";
         }
 
         function clearFormState() {
@@ -169,11 +184,7 @@
             document.getElementById('courseForm').reset();
             document.getElementById('formTitle').innerText = "Add New Academic Course Module";
             document.getElementById('cancelBtn').style.display = 'none';
-        }
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = "login.html";
+            document.getElementById('saveBtn').innerText = "Commit Data Record";
         }
 
         pullDirectoryData();
