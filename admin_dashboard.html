@@ -135,7 +135,7 @@
                 courseCode: document.getElementById('courseCode').value.trim().toUpperCase(),
                 title: document.getElementById('courseTitle').value.trim(),
                 description: document.getElementById('courseDesc').value.trim(),
-                lecturerId: Number(dropVal),
+                lecturerId: String(dropVal).trim(),,
                 role: 'admin'
             };
 
