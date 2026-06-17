@@ -180,29 +180,30 @@
             }
         }
 
-        async function loadLecturers() {
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/users?role=lecturer`);
-                const lecturers = await res.json();
-        
-                const select = document.getElementById('courseLecturerId');
-        
-                select.innerHTML = `<option value="">-- Select Lecturer --</option>`;
-        
-                lecturers.forEach(l => {
-                    select.innerHTML += `
-                        <option value="${l.userId}">
-                            ${l.name} (ID: ${l.userId})
-                        </option>
-                    `;
-                });
-        
-            } catch (err) {
-                triggerAlert("Failed to load lecturers", false);
-            }
-        }
+       async function loadLecturers() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/users?role=lecturer`);
+        const lecturers = await res.json();
 
-        function setEditMode(id, code, title, desc, lecturerId = 0) {
+        const select = document.getElementById('courseLecturerId');
+
+        select.innerHTML = `<option value="">-- Select Lecturer --</option>`;
+
+        lecturers.forEach(l => {
+            const actualId = l.userId || l._id || ''; 
+            select.innerHTML += `
+                <option value="${actualId}">
+                    ${l.name} (ID: ${actualId})
+                </option>
+            `;
+        });
+
+    } catch (err) {
+        triggerAlert("Failed to load lecturers list.", false);
+    }
+}
+
+        function setEditMode(id, code, title, desc, lecturerId = '') {
             document.getElementById('courseId').value = id;
             document.getElementById('courseCode').value = code;
             document.getElementById('courseTitle').value = title;
@@ -218,6 +219,7 @@
         function clearFormState() {
             document.getElementById('courseId').value = '';
             document.getElementById('courseForm').reset();
+            document.getElementById('courseLecturerId').value = ''; 
             document.getElementById('formTitle').innerText = "Add New Academic Course Module";
             document.getElementById('saveBtn').innerText = "Commit Data Record";
             document.getElementById('cancelBtn').style.display = 'none';
