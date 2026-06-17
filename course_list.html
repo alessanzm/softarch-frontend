@@ -10,9 +10,12 @@
 <body>
 
 <div class="navbar">
-    <h2>SMARTLEARN ADMIN PORTAL</h2>
-    <div>
-        <span id="userGreeting" style="color: #cbd5e1; margin-right: 15px; font-weight: 600; font-size:14px;"></span>
+    <h2>SMARTLEARN MASTER WORKSPACE (ADMIN)</h2>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <span id="userGreeting" style="color: #cbd5e1; font-weight: 600; font-size:14px;"></span>
+        <button onclick="window.location.href='course_list.html'" style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+            Course List
+        </button>
         <button onclick="logout()" class="logout-btn" style="padding: 6px 12px;">Sign Out</button>
     </div>
 </div>
