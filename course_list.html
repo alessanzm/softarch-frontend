@@ -62,7 +62,7 @@
     const role = localStorage.getItem('user_role') ? localStorage.getItem('user_role').trim() : '';
     const name = localStorage.getItem('user_name') || 'Guest';
 
-    // Sekatan Keselamatan Frontend
+    // Validasi Sesi Pengguna
     if (!userId) {
         window.location.href = "login.html";
     } else {
@@ -72,7 +72,7 @@
             document.getElementById('catalogTitle').innerText = "My Enrolled Academic Core Modules";
             document.getElementById('addCourseBtn').style.display = 'none';
             document.getElementById('actionHeader').style.display = 'none';
-            document.getElementById('enrollSection').style.display = 'block'; // Papar kotak input kod
+            document.getElementById('enrollSection').style.display = 'block'; 
         } else if (role === 'lecturer') {
             document.getElementById('catalogTitle').innerText = "My Created Courses (Lecturer Workspace)";
         }
@@ -92,7 +92,7 @@
     async function pullDirectoryData() {
         try {
             const res = await fetch(`${API_BASE_URL}/api/courses?role=${role}&userId=${userId}`);
-            if (!res.ok) throw new Error("API failure.");
+            if (!res.ok) throw new Error("Gagal mengambil respon API.");
             const courses = await res.json();
             
             const tbody = document.getElementById('coursesTableBody');
@@ -121,7 +121,7 @@
                 `;
             });
         } catch (err) {
-            triggerAlert("Ralat sistem semasa memuatkan data dari pangkalan data.", false);
+            triggerAlert("Ralat memuatkan senarai kursus dari pangkalan data.", false);
         }
     }
 
@@ -136,7 +136,7 @@
 
     async function joinCourseByCode(inputCode) {
         try {
-            // DIPERBAIKI: Menghantar data ke endpoint asli backend '/enroll'
+            // DISELARESKAN: Menghantar data ke sub-laluan '/api/courses/enroll'
             const res = await fetch(`${API_BASE_URL}/api/courses/enroll`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -165,10 +165,10 @@
             });
             if (res.ok) {
                 await pullDirectoryData();
-                triggerAlert("Course module mapping sequence executed out cleanly.");
+                triggerAlert("Course deleted cleanly.");
             } else {
                 const data = await res.json();
-                triggerAlert(data.error || "Deletion parameters mismatched.", false);
+                triggerAlert(data.error || "Deletion mismatched.", false);
             }
         } catch (error) {
             triggerAlert("Communication loss processing drop metrics.", false);
