@@ -8,11 +8,12 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        #matricField{
-            display:none;
+        #matricField {
+            display: none;
         }
     </style>
 
+    <script src="config.js"></script>
     <script>
         function checkRoleInput() {
             const role = document.getElementById("loginRole").value;
@@ -40,62 +41,30 @@
             SMARTLEARN LOGIN
         </h2>
 
-        <div id="loginAlert"
-             style="display:none; padding:10px; margin-bottom:15px;
-                    border-radius:4px; font-size:14px; text-align:center;">
-        </div>
+        <div id="loginAlert" style="display:none; padding:10px; margin-bottom:15px; border-radius:4px; font-size:14px; text-align:center;"></div>
 
         <form id="loginForm">
 
             <label for="loginRole">System Role Access</label>
-
-            <select id="loginRole"
-                    onchange="checkRoleInput()"
-                    style="width:100%; padding:10px; margin-bottom:15px;
-                           border:1px solid #cbd5e1; border-radius:4px;"
-                    required>
-
+            <select id="loginRole" onchange="checkRoleInput()" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #cbd5e1; border-radius:4px;" required>
                 <option value="">-- Choose Access Role --</option>
                 <option value="admin">System Administrator</option>
                 <option value="lecturer">Academic Lecturer</option>
                 <option value="student">Registered Student</option>
-
             </select>
 
             <div id="matricField">
-
                 <label for="matricNo">Matric Number</label>
-
-                <input type="text"
-                       id="matricNo"
-                       placeholder="e.g. S76278"
-                       style="width:100%; padding:10px; margin-bottom:15px;
-                              border:1px solid #cbd5e1; border-radius:4px;">
-
+                <input type="text" id="matricNo" placeholder="e.g. S76278" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #cbd5e1; border-radius:4px;">
             </div>
 
             <label for="loginEmail">Secure Email Address</label>
-
-            <input type="email"
-                   id="loginEmail"
-                   placeholder="name@domain.com"
-                   required
-                   style="width:100%; padding:10px; margin-bottom:15px;
-                          border:1px solid #cbd5e1; border-radius:4px;">
+            <input type="email" id="loginEmail" placeholder="name@domain.com" required style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #cbd5e1; border-radius:4px;">
 
             <label for="loginPassword">Account Password</label>
+            <input type="password" id="loginPassword" placeholder="••••••••" required style="width:100%; padding:10px; margin-bottom:20px; border:1px solid #cbd5e1; border-radius:4px;">
 
-            <input type="password"
-                   id="loginPassword"
-                   placeholder="••••••••"
-                   required
-                   style="width:100%; padding:10px; margin-bottom:20px;
-                          border:1px solid #cbd5e1; border-radius:4px;">
-
-            <button type="submit"
-                    style="width:100%; padding:12px; background:#2563eb;
-                           color:white; border:none; border-radius:4px;
-                           font-weight:600; cursor:pointer;">
+            <button type="submit" style="width:100%; padding:12px; background:#2563eb; color:white; border:none; border-radius:4px; font-weight:600; cursor:pointer;">
                 Authenticate Account
             </button>
 
@@ -105,60 +74,48 @@
 </div>
 
 <script>
-
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
-
     e.preventDefault();
 
     const alertBox = document.getElementById('loginAlert');
-
     const role = document.getElementById('loginRole').value;
     const email = document.getElementById('loginEmail').value.trim().toLowerCase();
     const password = document.getElementById('loginPassword').value;
     const matricNo = document.getElementById('matricNo').value.trim().toUpperCase();
 
     try {
+        const payload = { role, email, password, matricNo };
+        console.log("LOGIN PAYLOAD SENT:", payload);
 
-        const payload = {
-            role,
-            email,
-            password,
-            matricNo
-        };
-
-        console.log("LOGIN PAYLOAD:", payload);
-
-        const res = await fetch(
-            "https://softarch-backend-2.onrender.com/api/login",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(payload)
-            }
-        );
+        // Menggunakan API_BASE_URL global daripada config.js
+        const res = await fetch(`${API_BASE_URL}/api/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
 
         const data = await res.json();
-
-        console.log("LOGIN RESPONSE:", data);
+        console.log("LOGIN RESPONSE RECEIVED:", data);
 
         if (res.ok) {
+            // STRATEGI PENYELARASAN ID:
+            // Cuba dapatkan matricNo dahulu (untuk student), atau ID khas, baru jatuh kepada userId/user_id bawaan backend
+            const finalUserId = data.matricNo || data.userId || data.user_id || data._id;
+            const finalUserName = data.name || data.user_name || "User Workspace";
+            const finalUserRole = data.role || data.user_role || role;
 
-            localStorage.setItem(
-                "user_id",
-                data.userId || data.user_id
-            );
+            console.log("DATA AKAN DISIMPAN PADA LOCALSTORAGE:", {
+                user_id: finalUserId,
+                user_name: finalUserName,
+                user_role: finalUserRole
+            });
 
-            localStorage.setItem(
-                "user_name",
-                data.name || data.user_name
-            );
-
-            localStorage.setItem(
-                "user_role",
-                data.role || data.user_role
-            );
+            // Menyimpan nilai ke dalam simpanan pelayar browser
+            localStorage.setItem("user_id", finalUserId ? finalUserId.trim() : "");
+            localStorage.setItem("user_name", finalUserName);
+            localStorage.setItem("user_role", finalUserRole.toLowerCase().trim());
 
             alertBox.style.display = "block";
             alertBox.style.background = "#dcfce7";
@@ -166,48 +123,31 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             alertBox.innerText = "Login Successful!";
 
             setTimeout(() => {
-
-                const userRole =
-                    data.role || data.user_role;
-
-                if (userRole === "admin") {
+                if (finalUserRole === "admin") {
                     window.location.href = "admin_dashboard.html";
-                }
-                else if (userRole === "lecturer") {
+                } else if (finalUserRole === "lecturer") {
                     window.location.href = "lecturer_dashboard.html";
-                }
-                else {
+                } else {
                     window.location.href = "student_dashboard.html";
                 }
-
             }, 1000);
 
         } else {
-
             alertBox.style.display = "block";
             alertBox.style.background = "#fee2e2";
             alertBox.style.color = "#991b1b";
-            alertBox.innerText =
-                data.error || "Invalid login credentials.";
-
+            alertBox.innerText = data.error || "Invalid login credentials.";
         }
 
     } catch (err) {
-
-        console.error(err);
-
+        console.error("LOGIN SYSTEM ERROR:", err);
         alertBox.style.display = "block";
         alertBox.style.background = "#fee2e2";
         alertBox.style.color = "#991b1b";
-        alertBox.innerText =
-            "Failed to connect to backend server.";
-
+        alertBox.innerText = "Failed to connect to backend server.";
     }
-
 });
-
 </script>
 
 </body>
 </html>
-```
