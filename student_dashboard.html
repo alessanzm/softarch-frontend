@@ -108,7 +108,7 @@
                         Ralat sistem semasa memuatkan data dari pangkalan data.
                     </p>`;
             }
-        } // <--- DIBAIKI: Tanda penutup fungsi fetchEnrolledCourses yang hilang sebelum ini telah diletakkan di sini!
+        }
 
         function triggerAlert(message, successState = true) {
             const container = document.getElementById('notifyMessage');
@@ -135,7 +135,7 @@
                 if (!Array.isArray(courses) || courses.length === 0) {
                     grid.innerHTML = `
                         <div style="grid-column: 1/-1; text-align: center; padding: 20px; background: #f8fafc; border-radius: 8px;">
-                            <p style="color: #64748b; margin: 0; font-style: italic;">Anda belum mendaftar dalam mana-mana kursus.</p>
+                            <p style="color: #64748b; margin: 0; font-style: italic;"></p>
                         </div>`;
                     return;
                 }
@@ -162,7 +162,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        studentId: userId, // Dihantar terus sebagai jenis data sedia ada dari localStorage
+                        studentId: userId, 
                         courseCode: document.getElementById('enrollCourseCode').value.trim().toUpperCase()
                     })
                 });
@@ -186,7 +186,6 @@
             window.location.href = "login.html";
         }
 
-        // Jalankan fungsi sebaik sahaja halaman selesai dimuatkan
         pullDirectoryData();
         fetchEnrolledCourses();
     </script>
