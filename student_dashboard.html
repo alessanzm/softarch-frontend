@@ -22,8 +22,8 @@
         <div class="card" style="max-width: 450px;">
             <h2 style="color: #2563eb; font-size: 18px; margin-bottom: 15px;">Enroll In New Course</h2>
             <form id="joinCourseForm">
-                <label>Course Code String</label>
-                <input type="text" id="enrollCourseCode" placeholder="e.g. CSF3433" style="text-transform: uppercase;" required style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #cbd5e1; border-radius:4px;">
+                <label for="enrollCourseCode">Course Code String</label>
+                <input type="text" id="enrollCourseCode" placeholder="e.g. CSF3433" style="text-transform: uppercase; width:100%; padding:10px; margin-bottom:15px; border:1px solid #cbd5e1; border-radius:4px;" required>
                 <button type="submit" class="join-btn" style="width: 100%;">Process Enrollment</button>
             </form>
         </div>
@@ -37,6 +37,9 @@
                 </p>
             </div>
         </div>
+        
+        <div id="cardsLayoutContainer" style="margin-top: 20px;"></div>
+    </div>
 
     <script>
         const userId = localStorage.getItem('user_id');
@@ -44,67 +47,68 @@
         const name = localStorage.getItem('user_name');
         const currentStudentId = localStorage.getItem('user_id'); 
 
-async function fetchEnrolledCourses() {
-    const container = document.getElementById('enrolledCoursesContainer');
-    if (!container) return; // Keselamatan jika elemen HTML tiada
-
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/courses/enrolled?userId=${currentStudentId}`);
-        
-        if (!res.ok) throw new Error("Gagal berkomunikasi dengan pelayan fail.");
-        
-        const enrolledCourses = await res.json();
-                console.log("Senarai Kursus Berdaftar:", enrolledCourses);
-
-        if (!enrolledCourses || enrolledCourses.length === 0) {
-            container.innerHTML = `
-                <p style="text-align:center; color: #718096; font-style: italic; padding: 20px 0;">
-                    Anda belum mendaftar dalam mana-mana kursus.
-                </p>`;
-            return;
-        }
-
-        let htmlContent = `<div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">`;
-        
-        enrolledCourses.forEach(c => {
-            const tajukKursus = c.title || c.courseTitle || 'Kursus Tanpa Nama';
-            const kodKursus = c.courseCode || 'TIADA KOD';
-
-            htmlContent += `
-                <div style="padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                    <div>
-                        <span style="font-weight: 700; color: #1e3a8a; font-size: 15px;">${tajukKursus.toUpperCase()}</span>
-                        <br>
-                        <code style="background: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: 600; display: inline-block; margin-top: 5px;">
-                            ${kodKursus}
-                        </code>
-                    </div>
-                    <div>
-                        <span style="font-size: 12px; background: #dfg; background-color: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 20px; font-weight: 600;">
-                            Enrolled 
-                        </span>
-                    </div>
-                </div>
-            `;
-        });
-        
-        htmlContent += `</div>`;
-        
-        container.innerHTML = htmlContent;
-
-    } catch (err) {
-        console.error("Ralat paparan modul pelajar:", err);
-        container.innerHTML = `
-            <p style="text-align:center; color: #991b1b; padding: 20px 0; font-weight: 600;">
-                Ralat sistem semasa memuatkan data dari pangkalan data.
-            </p>`;
-    }
-
+        // Sila pastikan authentication disemak terlebih dahulu sebelum skrip lain berjalan
         if (!userId || role !== 'student') { 
             localStorage.clear();
             window.location.href = "login.html"; 
         }
-        document.getElementById('userGreeting').innerText = `${name.toUpperCase()} [STUDENT]`;
+        document.getElementById('userGreeting').innerText = `${(name || 'STUDENT').toUpperCase()} [STUDENT]`;
+
+        async function fetchEnrolledCourses() {
+            const container = document.getElementById('enrolledCoursesContainer');
+            if (!container) return; 
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/courses/enrolled?userId=${currentStudentId}`);
+                
+                if (!res.ok) throw new Error("Gagal berkomunikasi dengan pelayan fail.");
+                
+                const enrolledCourses = await res.json();
+                console.log("Senarai Kursus Berdaftar:", enrolledCourses);
+
+                if (!enrolledCourses || enrolledCourses.length === 0) {
+                    container.innerHTML = `
+                        <p style="text-align:center; color: #718096; font-style: italic; padding: 20px 0;">
+                            Anda belum mendaftar dalam mana-mana kursus.
+                        </p>`;
+                    return;
+                }
+
+                let htmlContent = `<div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">`;
+                
+                enrolledCourses.forEach(c => {
+                    const tajukKursus = c.title || c.courseTitle || 'Kursus Tanpa Nama';
+                    const kodKursus = c.courseCode || 'TIADA KOD';
+
+                    htmlContent += `
+                        <div style="padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <div>
+                                <span style="font-weight: 700; color: #1e3a8a; font-size: 15px;">${tajukKursus.toUpperCase()}</span>
+                                <br>
+                                <code style="background: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: 600; display: inline-block; margin-top: 5px;">
+                                    ${kodKursus}
+                                </code>
+                            </div>
+                            <div>
+                                <span style="font-size: 12px; background-color: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 20px; font-weight: 600;">
+                                    Enrolled ✅
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                htmlContent += `</div>`;
+                container.innerHTML = htmlContent;
+
+            } catch (err) {
+                console.error("Ralat paparan modul pelajar:", err);
+                container.innerHTML = `
+                    <p style="text-align:center; color: #991b1b; padding: 20px 0; font-weight: 600;">
+                        Ralat sistem semasa memuatkan data dari pangkalan data.
+                    </p>`;
+            }
+        } // <--- DIBAIKI: Tanda penutup fungsi fetchEnrolledCourses yang hilang sebelum ini telah diletakkan di sini!
 
         function triggerAlert(message, successState = true) {
             const container = document.getElementById('notifyMessage');
@@ -125,6 +129,7 @@ async function fetchEnrolledCourses() {
 
                 const courses = await res.json();
                 const grid = document.getElementById('cardsLayoutContainer');
+                if (!grid) return;
                 grid.innerHTML = '';
                 
                 if (!Array.isArray(courses) || courses.length === 0) {
@@ -157,7 +162,7 @@ async function fetchEnrolledCourses() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        studentId: parseInt(userId),
+                        studentId: userId, // Dihantar terus sebagai jenis data sedia ada dari localStorage
                         courseCode: document.getElementById('enrollCourseCode').value.trim().toUpperCase()
                     })
                 });
@@ -181,6 +186,7 @@ async function fetchEnrolledCourses() {
             window.location.href = "login.html";
         }
 
+        // Jalankan fungsi sebaik sahaja halaman selesai dimuatkan
         pullDirectoryData();
         fetchEnrolledCourses();
     </script>
