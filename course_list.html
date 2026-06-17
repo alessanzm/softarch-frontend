@@ -23,6 +23,14 @@
 <div class="container">
     <div id="notifyMessage" style="display: none; padding: 12px; font-size: 14px; margin-bottom: 25px; text-align: center; border-radius: 8px; font-weight: 600;"></div>
 
+    <div class="card" id="enrollSection" style="display: none; margin-bottom: 20px;">
+        <h3 style="color: var(--primary-blue); margin-top: 0;">Enroll In New Course</h3>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="courseCodeInputField" placeholder="Enter Course Code (e.g. CSE3433)" style="flex: 1; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+            <button onclick="triggerEnrollment()" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Process Enrollment</button>
+        </div>
+    </div>
+
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 id="catalogTitle" style="color: var(--primary-blue); margin: 0; font-size: 20px;">Global System Catalog Index</h2>
@@ -41,7 +49,7 @@
                 </thead>
                 <tbody id="coursesTableBody">
                     <tr>
-                        <td colspan="4" style="text-align: center; color: var(--text-muted);">Initialing system catalog links...</td>
+                        <td colspan="4" style="text-align: center; color: var(--text-muted);">Initializing system catalog links...</td>
                     </tr>
                 </tbody>
             </table>
@@ -50,8 +58,8 @@
 </div>
 
 <script>
-    const userId = localStorage.getItem('user_id');
-    const role = localStorage.getItem('user_role') || '';
+    const userId = localStorage.getItem('user_id') ? localStorage.getItem('user_id').trim() : '';
+    const role = localStorage.getItem('user_role') ? localStorage.getItem('user_role').trim() : '';
     const name = localStorage.getItem('user_name') || 'Guest';
 
     // Sekatan Keselamatan Frontend
@@ -61,10 +69,14 @@
         document.getElementById('userGreeting').innerText = `${name} [${role.toUpperCase()}]`;
         
         if (role === 'student') {
-            document.getElementById('catalogTitle').innerText = "My Registered Courses";
+            document.getElementById('catalogTitle').innerText = "My Enrolled Academic Core Modules";
             document.getElementById('addCourseBtn').style.display = 'none';
             document.getElementById('actionHeader').style.display = 'none';
+            document.getElementById('enrollSection').style.display = 'block'; // Papar kotak input kod
+        } else if (role === 'lecturer') {
+            document.getElementById('catalogTitle').innerText = "My Created Courses (Lecturer Workspace)";
         }
+        
         pullDirectoryData();
     }
 
@@ -87,12 +99,12 @@
             tbody.innerHTML = '';
 
             if (!courses || courses.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No database entries found for your account.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No courses found for your account.</td></tr>`;
                 return;
             }
 
             courses.forEach((c, idx) => {
-                const actionButtons = role === 'admin' ? `
+                const actionButtons = (role === 'admin' || role === 'lecturer') ? `
                     <td style="text-align: center;">
                         <a href="edit_course.html?id=${c._id}" class="btn-edit" style="text-decoration: none; margin-right: 4px;">Edit</a>
                         <button class="btn-delete" onclick="dropCourseEntry('${c._id}')">Delete</button>
@@ -109,7 +121,37 @@
                 `;
             });
         } catch (err) {
-            triggerAlert("Could not parse synchronization tables with data channels.", false);
+            triggerAlert("Ralat sistem semasa memuatkan data dari pangkalan data.", false);
+        }
+    }
+
+    async function triggerEnrollment() {
+        const inputCode = document.getElementById('courseCodeInputField').value;
+        if (!inputCode) {
+            triggerAlert("Please fill in the course code field.", false);
+            return;
+        }
+        await joinCourseByCode(inputCode);
+    }
+
+    async function joinCourseByCode(inputCode) {
+        try {
+            // DIPERBAIKI: Menghantar data ke endpoint asli backend '/enroll'
+            const res = await fetch(`${API_BASE_URL}/api/courses/enroll`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseCode: inputCode, userId: userId })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                triggerAlert("Successfully registered into the course!");
+                document.getElementById('courseCodeInputField').value = '';
+                pullDirectoryData(); 
+            } else {
+                triggerAlert(data.error || "Failed to register.", false);
+            }
+        } catch (err) {
+            triggerAlert("Network failure trying to register course.", false);
         }
     }
 
@@ -130,25 +172,6 @@
             }
         } catch (error) {
             triggerAlert("Communication loss processing drop metrics.", false);
-        }
-    }
-
-    async function joinCourseByCode(inputCode) {
-        try {
-            const res = await fetch(`${API_BASE_URL}/api/courses/join`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ courseCode: inputCode, userId: userId })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                triggerAlert("Successfully registered into the course!");
-                pullDirectoryData(); 
-            } else {
-                triggerAlert(data.error, false);
-            }
-        } catch (err) {
-            triggerAlert("Network failure trying to register course.", false);
         }
     }
 
