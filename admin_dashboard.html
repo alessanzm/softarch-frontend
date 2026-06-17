@@ -3,222 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartLearn | Admin Dashboard</title>
+    <title>SmartLearn | Admin Master Portal</title>
     <link rel="stylesheet" href="style.css">
     <script src="config.js"></script>
 </head>
-
 <body>
-
 <div class="navbar">
-    <h2>SMARTLEARN ADMIN PANEL</h2>
-    <div style="display:flex; gap:10px;">
-        <span id="userGreeting"></span>
-        <button onclick="logout()">Logout</button>
+    <h2>SMARTLEARN MASTER WORKSPACE (ADMIN)</h2>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <span id="userGreeting" style="color: #cbd5e1; font-weight: 600; font-size:14px;"></span>
+        <button onclick="window.location.href='course_list.html'" style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+            Course List
+        </button>
+        <button onclick="logout()" class="logout-btn" style="padding: 6px 12px;">Sign Out</button>
     </div>
 </div>
+    
+    <div class="container">
+        <div id="notifyMessage" style="display: none; padding: 12px; font-size: 14px; margin-bottom: 25px; text-align: center; border-radius: 8px; font-weight: 600;"></div>
 
-<div class="container">
+        <div class="card" id="managementView">
+            <h3 id="formTitle" style="color: #2563eb; margin-top:0; margin-bottom: 20px;">Add New Academic Course Module</h3>
+            <form id="courseForm">
+                <input type="hidden" id="courseId">
+                
+                <label for="courseCode">Unique Course Code</label>
+                <input type="text" id="courseCode" placeholder="e.g. CSF3433" style="text-transform: uppercase;" required>
 
-    <div id="notifyMessage" style="display:none; padding:10px;"></div>
+                <label for="courseTitle">Course Title Designator</label>
+                <input type="text" id="courseTitle" placeholder="e.g. Software Architecture Frameworks" required>
 
-    <!-- FORM -->
-    <div class="card">
-        <h3 id="formTitle">Add Course</h3>
+                <label for="courseDesc">Syllabus Course Specifications / Description</label>
+                <textarea id="courseDesc" rows="4" placeholder="Enter course summaries..." required></textarea>
 
-        <form id="courseForm">
+                <div class="form-group" id="lecturerAssignmentGroup" style="margin-bottom: 15px;">
+                    <label for="courseLecturerId" style="display: block; margin-bottom: 5px; font-weight:600;">Assign Designated Lecturer ID</label>
+                    <select id="courseLecturerId" required>
+                        <option value="">-- Select Lecturer --</option>
+                    </select>
+                </div>
 
-            <input type="hidden" id="courseId">
+                <div class="button-group">
+                    <button type="submit" id="saveBtn">Commit Data Record</button>
+                    <button type="button" id="cancelBtn" class="logout-btn" style="display: none;" onclick="clearFormState()">Abort Editing</button>
+                </div>
+            </form>
+        </div>
 
-            <label>Course Code</label>
-            <input type="text" id="courseCode" required>
-
-            <label>Title</label>
-            <input type="text" id="courseTitle" required>
-
-            <label>Description</label>
-            <textarea id="courseDesc" required></textarea>
-
-            <label>Lecturer</label>
-            <select id="courseLecturerId" required>
-                <option value="">-- Select Lecturer --</option>
-            </select>
-
-            <button type="submit">Save</button>
-        </form>
+        <div class="card">
+            <h2 style="color: #2563eb; font-size: 20px; margin-top:0; margin-bottom: 15px;">Global System Catalog Index (Admin Master Privileges)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Index</th>
+                        <th>Course Title Description</th>
+                        <th>Subject Code</th>
+                        <th>Lecturer ID</th>
+                        <th style="width: 180px;">Administrative Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="coursesTableBody"></tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- TABLE -->
-    <div class="card">
-        <h3>Courses</h3>
-        <table border="1" width="100%">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Title</th>
-                    <th>Code</th>
-                    <th>Lecturer</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="coursesTableBody"></tbody>
-        </table>
-    </div>
+    <script>
+        const userId = localStorage.getItem('user_id');
+        const role = localStorage.getItem('user_role');
+        const name = localStorage.getItem('user_name');
 
-</div>
+        if (!userId || role !== 'admin') { 
+            localStorage.clear();
+            window.location.href = "login.html"; 
+        }
+        document.getElementById('userGreeting').innerText = `${(name || 'ADMIN').toUpperCase()} [ADMIN]`;
 
-<script>
+        function triggerAlert(message, successState = true) {
+            const container = document.getElementById('notifyMessage');
+            container.innerText = message;
+            container.style.display = 'block';
+            container.style.background = successState ? '#dcfce7' : '#fee2e2';
+            container.style.color = successState ? '#166534' : '#991b1b';
+            setTimeout(() => { container.style.display = 'none'; }, 3500);
+        }
 
-const API = API_BASE_URL;
+        async function pullDirectoryData() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/courses?role=admin&userId=${userId}`);
+                if (!res.ok) throw new Error("API Exception.");
+                const courses = await res.json();
+                
+                const tbody = document.getElementById('coursesTableBody');
+                tbody.innerHTML = '';
 
-const userId = localStorage.getItem("user_id");
-const role = localStorage.getItem("user_role");
-const name = localStorage.getItem("user_name");
+                if (!courses || courses.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: #64748b;">Database mapping collection empty.</td></tr>`;
+                    return;
+                }
 
-if (!userId || role !== "admin") {
-    localStorage.clear();
-    window.location.href = "login.html";
-}
+                courses.forEach((c, idx) => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td><strong>${(c.title || '').toUpperCase()}</strong><br><small style="color:#718096;">${c.description || ''}</small></td>
+                            <td><code>${c.courseCode}</code></td>
+                            <td><span class="badge" style="background:#e2e8f0; padding:4px 8px; border-radius:4px;">ID: ${c.lecturerId || 'Unassigned'}</span></td>
+                            <td>
+                                <button class="btn-edit" onclick="setEditMode(${c.courseId}, '${escapeJS(c.courseCode)}', '${escapeJS(c.title)}', '${escapeJS(c.description || '')}', ${c.lecturerId || 0})">Edit</button>
+                                <button class="btn-delete" style="margin-left: 4px;" onclick="dropCourseEntry(${c.courseId})">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                triggerAlert("Error sync with backend API pipeline query operations.", false);
+            }
+        }
 
-document.getElementById("userGreeting").innerText = name + " (ADMIN)";
+        document.getElementById('courseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+        
+            const dropVal = document.getElementById('courseLecturerId').value;
+            const id = document.getElementById('courseId').value; 
+        
+            if (!dropVal) {
+                triggerAlert("Please select a lecturer!", false);
+                return;
+            }
+        
+            const payload = {
+                courseCode: document.getElementById('courseCode').value.trim().toUpperCase(),
+                title: document.getElementById('courseTitle').value.trim(),
+                description: document.getElementById('courseDesc').value.trim(),
+                lecturerId: Number(dropVal),
+                role: 'admin'
+            };
 
-function notify(msg, ok=true){
-    const box = document.getElementById("notifyMessage");
-    box.style.display = "block";
-    box.style.background = ok ? "#d1fae5" : "#fee2e2";
-    box.innerText = msg;
-    setTimeout(()=>box.style.display="none",3000);
-}
+            console.log(payload); 
 
-/* ================= LECTURERS ================= */
-async function loadLecturers(){
-    try{
-        const res = await fetch(`${API}/api/users?role=lecturer`);
-        const data = await res.json();
+            let targetUrl = id ? `${API_BASE_URL}/api/courses/${id}` : `${API_BASE_URL}/api/courses`;
+            let targetMethod = id ? 'PUT' : 'POST';
 
-        const select = document.getElementById("courseLecturerId");
-        select.innerHTML = `<option value="">-- Select Lecturer --</option>`;
-
-        data.forEach(l=>{
-            select.innerHTML += `
-                <option value="${l.userId}">
-                    ${l.name} (ID: ${l.userId})
-                </option>
-            `;
+            try {
+                const res = await fetch(targetUrl, {
+                    method: targetMethod,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    clearFormState();
+                    await pullDirectoryData();
+                    triggerAlert("Course mapping data committed successfully!");
+                } else {
+                    const data = await res.json();
+                    triggerAlert(data.error || "Error executing model layout query logic.", false);
+                }
+            } catch (err) {
+                triggerAlert("Network communications structural anomaly detected.", false);
+            }
         });
 
-    }catch(err){
-        notify("Failed to load lecturers", false);
-    }
-}
+        async function dropCourseEntry(courseId) {
+            if (!confirm("Are you sure you want to permanently delete this course row entry?")) return;
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role: 'admin' }) 
+                });
+                if (res.ok) {
+                    await pullDirectoryData();
+                    triggerAlert("Course sequence successfully deleted.");
+                }
+            } catch (error) {
+                triggerAlert("Could not finalize delete routine operation.", false);
+            }
+        }
 
-/* ================= COURSES ================= */
-async function loadCourses(){
-    const res = await fetch(`${API}/api/courses?role=admin&userId=${userId}`);
-    const data = await res.json();
+        async function loadLecturers() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/users?role=lecturer`);
+                const lecturers = await res.json();
+        
+                const select = document.getElementById('courseLecturerId');
+        
+                select.innerHTML = `<option value="">-- Select Lecturer --</option>`;
+        
+                lecturers.forEach(l => {
+                    select.innerHTML += `
+                        <option value="${l.userId}">
+                            ${l.name} (ID: ${l.userId})
+                        </option>
+                    `;
+                });
+        
+            } catch (err) {
+                triggerAlert("Failed to load lecturers", false);
+            }
+        }
 
-    const tbody = document.getElementById("coursesTableBody");
-    tbody.innerHTML = "";
+        function setEditMode(id, code, title, desc, lecturerId = 0) {
+            document.getElementById('courseId').value = id;
+            document.getElementById('courseCode').value = code;
+            document.getElementById('courseTitle').value = title;
+            document.getElementById('courseDesc').value = desc;
+            document.getElementById('courseLecturerId').value = lecturerId || "";
 
-    data.forEach((c,i)=>{
-        tbody.innerHTML += `
-            <tr>
-                <td>${i+1}</td>
-                <td>${c.title}</td>
-                <td>${c.courseCode}</td>
-                <td>${c.lecturerId || "N/A"}</td>
-                <td>
-                    <button onclick="editCourse('${c._id}','${c.courseCode}','${c.title}','${c.description}','${c.lecturerId}')">Edit</button>
-                    <button onclick="deleteCourse('${c._id}')">Delete</button>
-                </td>
-            </tr>
-        `;
-    });
-}
+            document.getElementById('formTitle').innerText = "Modify Existing Course Module Architecture Mapping";
+            document.getElementById('saveBtn').innerText = "Update Data Record";
+            document.getElementById('cancelBtn').style.display = 'inline-block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-/* ================= SUBMIT ================= */
-document.getElementById("courseForm").addEventListener("submit", async (e)=>{
-    e.preventDefault();
+        function clearFormState() {
+            document.getElementById('courseId').value = '';
+            document.getElementById('courseForm').reset();
+            document.getElementById('formTitle').innerText = "Add New Academic Course Module";
+            document.getElementById('saveBtn').innerText = "Commit Data Record";
+            document.getElementById('cancelBtn').style.display = 'none';
+        }
 
-    const id = document.getElementById("courseId").value;
-    const dropVal = document.getElementById("courseLecturerId").value;
+        function logout() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
 
-    if(!dropVal){
-        notify("Please select lecturer", false);
-        return;
-    }
+        function escapeJS(str) { 
+            if (!str) return '';
+            return str
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '\\"')
+                .replace(/\n/g, '\\n')
+                .replace(/\r/g, '\\r'); 
+        }
 
-    const payload = {
-        courseCode: document.getElementById("courseCode").value.trim().toUpperCase(),
-        title: document.getElementById("courseTitle").value.trim(),
-        description: document.getElementById("courseDesc").value.trim(),
-        lecturerId: Number(dropVal),
-        role: "admin"
-    };
-
-    try{
-        const url = id 
-            ? `${API}/api/courses/${id}`
-            : `${API}/api/courses`;
-
-        const method = id ? "PUT" : "POST";
-
-        const res = await fetch(url,{
-            method,
-            headers:{ "Content-Type":"application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-
-        if(!res.ok) throw new Error(data.error || "Server error");
-
-        notify("Saved successfully!");
-        clearForm();
-        loadCourses();
-
-    }catch(err){
-        notify(err.message, false);
-    }
-});
-
-/* ================= DELETE ================= */
-async function deleteCourse(id){
-    await fetch(`${API}/api/courses/${id}`,{
-        method:"DELETE"
-    });
-
-    loadCourses();
-}
-
-/* ================= EDIT ================= */
-function editCourse(id,code,title,desc,lecturerId){
-    document.getElementById("courseId").value = id;
-    document.getElementById("courseCode").value = code;
-    document.getElementById("courseTitle").value = title;
-    document.getElementById("courseDesc").value = desc;
-    document.getElementById("courseLecturerId").value = lecturerId;
-}
-
-/* ================= CLEAR ================= */
-function clearForm(){
-    document.getElementById("courseId").value = "";
-    document.getElementById("courseForm").reset();
-}
-
-/* ================= LOGOUT ================= */
-function logout(){
-    localStorage.clear();
-    window.location.href="login.html";
-}
-
-/* ================= INIT ================= */
-window.onload = async () => {
-    await loadLecturers();
-    await loadCourses();
-};
-
-</script>
-
+        pullDirectoryData();
+        loadLecturers();
+    </script>
 </body>
 </html>
