@@ -1,85 +1,214 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartLearn | Secure Login Gateway</title>
+    <title>SMARTLEARN LOGIN</title>
+
     <link rel="stylesheet" href="style.css">
-    <script src="config.js"></script> 
-</head>
-<body>
-    <div class="container" style="max-width: 400px; margin-top: 100px;">
-        <div class="card">
-            <h2 style="color: #2563eb; text-align: center; margin-bottom: 20px;">SMARTLEARN LOGIN</h2>
-            <div id="loginAlert" style="display: none; padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 14px; text-align: center;"></div>
-            
-            <form id="loginForm">
-                <label for="loginRole">System Role Access</label>
-                <select id="loginRole" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px;" required>
-                    <option value="">-- Choose Access Role --</option>
-                    <option value="admin">System Administrator</option>
-                    <option value="lecturer">Academic Lecturer</option>
-                    <option value="student">Registered Student</option>
-                </select>
 
-                <label for="loginEmail">Secure Email Address</label>
-                <input type="email" id="loginEmail" placeholder="name@domain.com" required style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px;">
-
-                <label for="loginPassword">Account Password</label>
-                <input type="password" id="loginPassword" placeholder="••••••••" required style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #cbd5e1; border-radius: 4px;">
-
-                <button type="submit" style="width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer;">Authenticate Account</button>
-            </form>
-        </div>
-    </div>
+    <style>
+        #matricField{
+            display:none;
+        }
+    </style>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const alertBox = document.getElementById('loginAlert');
-            const role = document.getElementById('loginRole').value;
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
+        function checkRoleInput() {
+            const role = document.getElementById("loginRole").value;
+            const matricField = document.getElementById("matricField");
+            const matricNo = document.getElementById("matricNo");
 
-            try {
-                fetch("https://softarch-backend-2.onrender.com/api/login", {                    
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, role })
-                });
-
-                const data = await res.json();
-
-                if (res.ok) {
-                    // Simpan data sesi penting ke localStorage
-                    localStorage.setItem('user_id', data.user.id || data.user.userId || data.user._id);
-                    localStorage.setItem('user_role', role);
-                    localStorage.setItem('user_name', data.user.name || data.user.fullName || 'User');
-
-                    alertBox.style.display = 'block';
-                    alertBox.style.background = '#dcfce7';
-                    alertBox.style.color = '#166534';
-                    alertBox.style.innerText = "Authentication successful! Redirecting...";
-
-                    // Halau pengguna mengikut peranan (Role-based Routing)
-                    setTimeout(() => {
-                        if (role === 'admin') window.location.href = "admin_dashboard.html";
-                        else if (role === 'lecturer') window.location.href = "lecturer_dashboard.html";
-                        else if (role === 'student') window.location.href = "student_dashboard.html";
-                    }, 1000);
-                } else {
-                    alertBox.style.display = 'block';
-                    alertBox.style.background = '#fee2e2';
-                    alertBox.style.color = '#991b1b';
-                    alertBox.innerText = data.error || "Invalid credentials or unauthorized role connection.";
-                }
-            } catch (err) {
-                alertBox.style.display = 'block';
-                alertBox.style.background = '#fee2e2';
-                alertBox.style.color = '#991b1b';
-                alertBox.innerText = "Failed to link with authentication API server pipeline.";
+            if (role === "student") {
+                matricField.style.display = "block";
+                matricNo.required = true;
+            } else {
+                matricField.style.display = "none";
+                matricNo.required = false;
+                matricNo.value = "";
             }
-        });
+        }
     </script>
+</head>
+
+<body>
+
+<div class="container" style="max-width:400px; margin-top:100px;">
+    <div class="card">
+
+        <h2 style="color:#2563eb; text-align:center; margin-bottom:20px;">
+            SMARTLEARN LOGIN
+        </h2>
+
+        <div id="loginAlert"
+             style="display:none; padding:10px; margin-bottom:15px;
+                    border-radius:4px; font-size:14px; text-align:center;">
+        </div>
+
+        <form id="loginForm">
+
+            <label for="loginRole">System Role Access</label>
+
+            <select id="loginRole"
+                    onchange="checkRoleInput()"
+                    style="width:100%; padding:10px; margin-bottom:15px;
+                           border:1px solid #cbd5e1; border-radius:4px;"
+                    required>
+
+                <option value="">-- Choose Access Role --</option>
+                <option value="admin">System Administrator</option>
+                <option value="lecturer">Academic Lecturer</option>
+                <option value="student">Registered Student</option>
+
+            </select>
+
+            <div id="matricField">
+
+                <label for="matricNo">Matric Number</label>
+
+                <input type="text"
+                       id="matricNo"
+                       placeholder="e.g. S76278"
+                       style="width:100%; padding:10px; margin-bottom:15px;
+                              border:1px solid #cbd5e1; border-radius:4px;">
+
+            </div>
+
+            <label for="loginEmail">Secure Email Address</label>
+
+            <input type="email"
+                   id="loginEmail"
+                   placeholder="name@domain.com"
+                   required
+                   style="width:100%; padding:10px; margin-bottom:15px;
+                          border:1px solid #cbd5e1; border-radius:4px;">
+
+            <label for="loginPassword">Account Password</label>
+
+            <input type="password"
+                   id="loginPassword"
+                   placeholder="••••••••"
+                   required
+                   style="width:100%; padding:10px; margin-bottom:20px;
+                          border:1px solid #cbd5e1; border-radius:4px;">
+
+            <button type="submit"
+                    style="width:100%; padding:12px; background:#2563eb;
+                           color:white; border:none; border-radius:4px;
+                           font-weight:600; cursor:pointer;">
+                Authenticate Account
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+
+    e.preventDefault();
+
+    const alertBox = document.getElementById('loginAlert');
+
+    const role = document.getElementById('loginRole').value;
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const password = document.getElementById('loginPassword').value;
+    const matricNo = document.getElementById('matricNo').value.trim().toUpperCase();
+
+    try {
+
+        const payload = {
+            role,
+            email,
+            password,
+            matricNo
+        };
+
+        console.log("LOGIN PAYLOAD:", payload);
+
+        const res = await fetch(
+            "https://softarch-backend-2.onrender.com/api/login",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            }
+        );
+
+        const data = await res.json();
+
+        console.log("LOGIN RESPONSE:", data);
+
+        if (res.ok) {
+
+            localStorage.setItem(
+                "user_id",
+                data.userId || data.user_id
+            );
+
+            localStorage.setItem(
+                "user_name",
+                data.name || data.user_name
+            );
+
+            localStorage.setItem(
+                "user_role",
+                data.role || data.user_role
+            );
+
+            alertBox.style.display = "block";
+            alertBox.style.background = "#dcfce7";
+            alertBox.style.color = "#166534";
+            alertBox.innerText = "Login Successful!";
+
+            setTimeout(() => {
+
+                const userRole =
+                    data.role || data.user_role;
+
+                if (userRole === "admin") {
+                    window.location.href = "admin_dashboard.html";
+                }
+                else if (userRole === "lecturer") {
+                    window.location.href = "lecturer_dashboard.html";
+                }
+                else {
+                    window.location.href = "student_dashboard.html";
+                }
+
+            }, 1000);
+
+        } else {
+
+            alertBox.style.display = "block";
+            alertBox.style.background = "#fee2e2";
+            alertBox.style.color = "#991b1b";
+            alertBox.innerText =
+                data.error || "Invalid login credentials.";
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+        alertBox.style.display = "block";
+        alertBox.style.background = "#fee2e2";
+        alertBox.style.color = "#991b1b";
+        alertBox.innerText =
+            "Failed to connect to backend server.";
+
+    }
+
+});
+
+</script>
+
 </body>
 </html>
+```
