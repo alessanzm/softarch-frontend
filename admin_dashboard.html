@@ -120,18 +120,25 @@
             }
         }
 
-        document.getElementById('courseForm').addEventListener('submit', async (e) => {
+       document.getElementById('courseForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const id = document.getElementById('courseId').value;
+        
             const dropVal = document.getElementById('courseLecturerId').value;
-
+        
+            if (!dropVal) {
+                triggerAlert("Please select a lecturer!", false);
+                return;
+            }
+        
             const payload = {
                 courseCode: document.getElementById('courseCode').value.trim().toUpperCase(),
                 title: document.getElementById('courseTitle').value.trim(),
                 description: document.getElementById('courseDesc').value.trim(),
-                lecturerId: dropVal ? parseInt(dropVal) : null,
-                role: 'admin' 
+                lecturerId: Number(dropVal),
+                role: 'admin'
             };
+
+        console.log(payload); 
 
             let targetUrl = id ? `${API_BASE_URL}/api/courses/${id}` : `${API_BASE_URL}/api/courses`;
             let targetMethod = id ? 'PUT' : 'POST';
