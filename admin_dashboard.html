@@ -38,7 +38,9 @@
 
                 <div class="form-group" id="lecturerAssignmentGroup" style="margin-bottom: 15px;">
                     <label for="courseLecturerId" style="display: block; margin-bottom: 5px; font-weight:600;">Assign Designated Lecturer ID</label>
-                    <input type="number" id="courseLecturerId" placeholder="Enter Lecturer Numeric ID (e.g. 12)" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 4px;">
+                    <select id="courseLecturerId" required>
+                        <option value="">-- Select Lecturer --</option>
+                    </select>
                 </div>
 
                 <div class="button-group">
@@ -170,6 +172,28 @@
             }
         }
 
+        async function loadLecturers() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/users?role=lecturer`);
+                const lecturers = await res.json();
+        
+                const select = document.getElementById('courseLecturerId');
+        
+                select.innerHTML = `<option value="">-- Select Lecturer --</option>`;
+        
+                lecturers.forEach(l => {
+                    select.innerHTML += `
+                        <option value="${l.userId}">
+                            ${l.name} (ID: ${l.userId})
+                        </option>
+                    `;
+                });
+        
+            } catch (err) {
+                triggerAlert("Failed to load lecturers", false);
+            }
+        }
+
         function setEditMode(id, code, title, desc, lecturerId = 0) {
             document.getElementById('courseId').value = id;
             document.getElementById('courseCode').value = code;
@@ -199,6 +223,7 @@
         function escapeJS(str) { return str.replace(/'/g, "\\'"); }
 
         pullDirectoryData();
+        loadLecturers();
     </script>
 </body>
 </html>
