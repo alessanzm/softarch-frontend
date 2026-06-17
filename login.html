@@ -87,7 +87,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const payload = { role, email, password, matricNo };
         console.log("LOGIN PAYLOAD SENT:", payload);
 
-        // Menggunakan API_BASE_URL global daripada config.js
+        // Memanggil URL dinamik dari config.js
         const res = await fetch(`${API_BASE_URL}/api/login`, {
             method: "POST",
             headers: {
@@ -100,11 +100,35 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         console.log("LOGIN RESPONSE RECEIVED:", data);
 
         if (res.ok) {
-            // STRATEGI PENYELARASAN ID:
-            // Cuba dapatkan matricNo dahulu (untuk student), atau ID khas, baru jatuh kepada userId/user_id bawaan backend
-            const finalUserId = data.matricNo || data.userId || data.user_id || data._id;
-            const finalUserName = data.name || data.user_name || "User Workspace";
-            const finalUserRole = data.role || data.user_role || role;
+            // =======================================================
+            // STRATEGI FILTERS EMERGENSI (PENYELESAIAN BARIS 129)
+            // =======================================================
+            let finalUserId = "";
+            
+            // 1. Semak jika data berada di dalam objek bersarang 'user' bawaan backend
+            if (data.user && data.user.userId) finalUserId = data.user.userId;
+            else if (data.user && data.user._id) finalUserId = data.user._id;
+            else if (data.user && data.user.matricNo) finalUserId = data.user.matricNo;
+            // 2. Semak paras utama (root level) objek respons
+            else if (data.userId) finalUserId = data.userId;
+            else if (data.user_id) finalUserId = data.user_id;
+            else if (data._id) finalUserId = data._id;
+            else if (data.matricNo) finalUserId = data.matricNo;
+            // 3. Mod kecemasan: Jika admin tiada ID unik dari db, berikan nama sesi khas
+            else if (role === 'admin') finalUserId = "ADMIN_SESSION";
+
+            // Menapis kemungkinan pemulangan nama pengguna
+            let finalUserName = "User Workspace";
+            if (data.user && data.user.name) finalUserName = data.user.name;
+            else if (data.name) finalUserName = data.name;
+            else if (data.user_name) finalUserName = data.user_name;
+            else if (role === 'admin') finalUserName = "System Administrator";
+
+            // Menapis peranan akses pengguna
+            let finalUserRole = role; 
+            if (data.user && data.user.role) finalUserRole = data.user.role;
+            else if (data.role) finalUserRole = data.role;
+            else if (data.user_role) finalUserRole = data.user_role;
 
             console.log("DATA AKAN DISIMPAN PADA LOCALSTORAGE:", {
                 user_id: finalUserId,
@@ -112,10 +136,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 user_role: finalUserRole
             });
 
-            // Menyimpan nilai ke dalam simpanan pelayar browser
-            localStorage.setItem("user_id", finalUserId ? finalUserId.trim() : "");
-            localStorage.setItem("user_name", finalUserName);
-            localStorage.setItem("user_role", finalUserRole.toLowerCase().trim());
+            // Menyimpan nilai ke dalam simpanan pelayar browser secara selamat
+            localStorage.setItem("user_id", String(finalUserId).trim());
+            localStorage.setItem("user_name", String(finalUserName).trim());
+            localStorage.setItem("user_role", String(finalUserRole).toLowerCase().trim());
 
             alertBox.style.display = "block";
             alertBox.style.background = "#dcfce7";
@@ -123,9 +147,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             alertBox.innerText = "Login Successful!";
 
             setTimeout(() => {
-                if (finalUserRole === "admin") {
+                const checkedRole = String(finalUserRole).toLowerCase().trim();
+                if (checkedRole === "admin") {
                     window.location.href = "admin_dashboard.html";
-                } else if (finalUserRole === "lecturer") {
+                } else if (checkedRole === "lecturer") {
                     window.location.href = "lecturer_dashboard.html";
                 } else {
                     window.location.href = "student_dashboard.html";
