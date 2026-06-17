@@ -54,6 +54,7 @@
     const role = localStorage.getItem('user_role') || '';
     const name = localStorage.getItem('user_name') || 'Guest';
 
+    // Sekatan Keselamatan Frontend
     if (!userId) {
         window.location.href = "login.html";
     } else {
@@ -64,7 +65,6 @@
             document.getElementById('addCourseBtn').style.display = 'none';
             document.getElementById('actionHeader').style.display = 'none';
         }
-        
         pullDirectoryData();
     }
 
@@ -87,7 +87,7 @@
             tbody.innerHTML = '';
 
             if (!courses || courses.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No courses found for your account.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No database entries found for your account.</td></tr>`;
                 return;
             }
 
@@ -97,7 +97,7 @@
                         <a href="edit_course.html?id=${c._id}" class="btn-edit" style="text-decoration: none; margin-right: 4px;">Edit</a>
                         <button class="btn-delete" onclick="dropCourseEntry('${c._id}')">Delete</button>
                     </td>
-                ` : ''; 
+                ` : '';
 
                 tbody.innerHTML += `
                     <tr>
@@ -130,6 +130,25 @@
             }
         } catch (error) {
             triggerAlert("Communication loss processing drop metrics.", false);
+        }
+    }
+
+    async function joinCourseByCode(inputCode) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/courses/join`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseCode: inputCode, userId: userId })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                triggerAlert("Successfully registered into the course!");
+                pullDirectoryData(); 
+            } else {
+                triggerAlert(data.error, false);
+            }
+        } catch (err) {
+            triggerAlert("Network failure trying to register course.", false);
         }
     }
 
