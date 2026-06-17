@@ -56,8 +56,9 @@
         if (!userId || role !== 'lecturer') { 
             localStorage.clear();
             window.location.href = "login.html"; 
+        } else {
+            document.getElementById('userGreeting').innerText = `${(name || 'LECTURER').toUpperCase()} [LECTURER]`;
         }
-        document.getElementById('userGreeting').innerText = `${name.toUpperCase()} [LECTURER]`;
 
         function triggerAlert(message, successState = true) {
             const container = document.getElementById('notifyMessage');
@@ -81,11 +82,9 @@
                 }
 
                 courses.forEach((c, index) => {
-                    // Membersihkan tanda petikan tunggal/kembar supaya tidak merosakkan fungsi onclick HTML
                     const safeDesc = c.description ? c.description.replace(/'/g, "\\'").replace(/"/g, '\\"') : '';
                     const safeTitle = c.title ? c.title.replace(/'/g, "\\'").replace(/"/g, '\\"') : '';
 
-                    // KEMASKINI KETAT: Memastikan c._id (huruf kecil) digunakan pada setEditMode dan dropCourseEntry
                     grid.innerHTML += `
                         <div class="course-card" style="border-left: 4px solid #10b981; margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                             <div>
@@ -145,7 +144,7 @@
 
         async function dropCourseEntry(courseId) {
             if (!courseId || courseId === 'undefined') {
-                triggerAlert("Ralat: ID Kursus tidak sah atau tidak ditemui.", false);
+                triggerAlert("Ralat: ID Kursus tidak sah.", false);
                 return;
             }
 
@@ -162,7 +161,7 @@
                     triggerAlert("Course successfully deleted.");
                 } else {
                     const data = await res.json();
-                    triggerAlert(data.error || "Gagal memadam kursus.", false);
+                    triggerAlert(data.error || "Gagal memadam data.", false);
                 }
             } catch (error) {
                 triggerAlert("Ralat memadam data.", false);
@@ -185,6 +184,11 @@
             document.getElementById('formTitle').innerText = "Add New Academic Course Module";
             document.getElementById('cancelBtn').style.display = 'none';
             document.getElementById('saveBtn').innerText = "Commit Data Record";
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "index.html";
         }
 
         pullDirectoryData();
