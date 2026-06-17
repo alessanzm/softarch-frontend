@@ -102,21 +102,48 @@
                 }
 
                 courses.forEach((c, idx) => {
+                    // DIBAIKI: Mengekstrak ID pintar yang fleksibel dari pelbagai skema (_id atau courseId)
+                    const actualCourseId = c._id || c.courseId || '';
+                    const actualLecturerId = c.lecturerId || '';
+
+                    // DIBAIKI: Tukar objek subjek ke Base64 JSON untuk diproses oleh handleEditClick dengan selamat
+                    const base64Data = btoa(unescape(encodeURIComponent(JSON.stringify(c))));
+
                     tbody.innerHTML += `
                         <tr>
                             <td>${idx + 1}</td>
                             <td><strong>${(c.title || '').toUpperCase()}</strong><br><small style="color:#718096;">${c.description || ''}</small></td>
                             <td><code>${c.courseCode}</code></td>
-                            <td><span class="badge" style="background:#e2e8f0; padding:4px 8px; border-radius:4px;">ID: ${c.lecturerId || 'Unassigned'}</span></td>
+                            <td><span class="badge" style="background:#e2e8f0; padding:4px 8px; border-radius:4px;">ID: ${actualLecturerId || 'Unassigned'}</span></td>
                             <td>
-                                <button class="btn-edit" onclick="setEditMode(${c.courseId}, '${escapeJS(c.courseCode)}', '${escapeJS(c.title)}', '${escapeJS(c.description || '')}', ${c.lecturerId || 0})">Edit</button>
-                                <button class="btn-delete" style="margin-left: 4px;" onclick="dropCourseEntry(${c.courseId})">Delete</button>
+                                <button class="btn-edit" onclick="handleEditClick('${base64Data}')">Edit</button>
+                                <button class="btn-delete" style="margin-left: 4px;" onclick="dropCourseEntry('${actualCourseId}')">Delete</button>
                             </td>
                         </tr>
                     `;
                 });
             } catch (err) {
                 triggerAlert("Error sync with backend API pipeline query operations.", false);
+            }
+        }
+
+        // DIBAIKI: Fungsi baru untuk menguraikan data Base64 dengan selamat untuk menghalang ralat 'undefined'
+        function handleEditClick(base64Data) {
+            try {
+                const decodedString = decodeURIComponent(escape(atob(base64Data)));
+                const course = JSON.parse(decodedString);
+                
+                const idUntukDiedit = course._id || course.courseId || '';
+                
+                setEditMode(
+                    idUntukDiedit, 
+                    course.courseCode || '', 
+                    course.title || '', 
+                    course.description || '', 
+                    course.lecturerId || ''
+                );
+            } catch (e) {
+                console.error("Gagal memproses tindakan edit data:", e);
             }
         }
 
@@ -139,8 +166,7 @@
                 role: 'admin'
             };
 
-            console.log(payload); 
-
+            // DIBAIKI: Logik penukaran antara operasi PUT (kemaskini) atau POST (tambah baharu)
             let targetUrl = id ? `${API_BASE_URL}/api/courses/${id}` : `${API_BASE_URL}/api/courses`;
             let targetMethod = id ? 'PUT' : 'POST';
 
@@ -153,7 +179,7 @@
                 if (res.ok) {
                     clearFormState();
                     await pullDirectoryData();
-                    triggerAlert("Course mapping data committed successfully!");
+                    triggerAlert(id ? "Course mapping data updated successfully!" : "Course mapping data committed successfully!");
                 } else {
                     const data = await res.json();
                     triggerAlert(data.error || "Error executing model layout query logic.", false);
@@ -164,6 +190,10 @@
         });
 
         async function dropCourseEntry(courseId) {
+            if (!courseId || courseId === 'undefined') {
+                triggerAlert("Invalid Course ID for deletion.", false);
+                return;
+            }
             if (!confirm("Are you sure you want to permanently delete this course row entry?")) return;
             try {
                 const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}`, {
@@ -180,28 +210,26 @@
             }
         }
 
-       async function loadLecturers() {
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/users?role=lecturer`);
-        const lecturers = await res.json();
+        async function loadLecturers() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/users?role=lecturer`);
+                const lecturers = await res.json();
 
-        const select = document.getElementById('courseLecturerId');
+                const select = document.getElementById('courseLecturerId');
+                select.innerHTML = `<option value="">-- Select Lecturer --</option>`;
 
-        select.innerHTML = `<option value="">-- Select Lecturer --</option>`;
-
-        lecturers.forEach(l => {
-            const actualId = l.userId || l._id || ''; 
-            select.innerHTML += `
-                <option value="${actualId}">
-                    ${l.name} (ID: ${actualId})
-                </option>
-            `;
-        });
-
-    } catch (err) {
-        triggerAlert("Failed to load lecturers list.", false);
-    }
-}
+                lecturers.forEach(l => {
+                    const actualId = l.userId || l._id || ''; 
+                    select.innerHTML += `
+                        <option value="${actualId}">
+                            ${l.name} (ID: ${actualId})
+                        </option>
+                    `;
+                });
+            } catch (err) {
+                triggerAlert("Failed to load lecturers list.", false);
+            }
+        }
 
         function setEditMode(id, code, title, desc, lecturerId = '') {
             document.getElementById('courseId').value = id;
@@ -230,16 +258,7 @@
             window.location.href = "login.html";
         }
 
-        function escapeJS(str) { 
-            if (!str) return '';
-            return str
-                .replace(/\\/g, '\\\\')
-                .replace(/'/g, "\\'")
-                .replace(/"/g, '\\"')
-                .replace(/\n/g, '\\n')
-                .replace(/\r/g, '\\r'); 
-        }
-
+        // Panggilan awal sistem
         pullDirectoryData();
         loadLecturers();
     </script>
