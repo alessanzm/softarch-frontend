@@ -102,11 +102,9 @@
                 }
 
                 courses.forEach((c, idx) => {
-                    // DIBAIKI: Mengekstrak ID pintar yang fleksibel dari pelbagai skema (_id atau courseId)
                     const actualCourseId = c._id || c.courseId || '';
                     const actualLecturerId = c.lecturerId || '';
 
-                    // DIBAIKI: Tukar objek subjek ke Base64 JSON untuk diproses oleh handleEditClick dengan selamat
                     const base64Data = btoa(unescape(encodeURIComponent(JSON.stringify(c))));
 
                     tbody.innerHTML += `
@@ -127,7 +125,6 @@
             }
         }
 
-        // DIBAIKI: Fungsi baru untuk menguraikan data Base64 dengan selamat untuk menghalang ralat 'undefined'
         function handleEditClick(base64Data) {
             try {
                 const decodedString = decodeURIComponent(escape(atob(base64Data)));
@@ -152,21 +149,28 @@
         
             const dropVal = document.getElementById('courseLecturerId').value;
             const id = document.getElementById('courseId').value; 
-        
+            
             if (!dropVal) {
                 triggerAlert("Please select a lecturer!", false);
                 return;
             }
-        
+            
+            // Membina struktur payload utama
             const payload = {
                 courseCode: document.getElementById('courseCode').value.trim().toUpperCase(),
                 title: document.getElementById('courseTitle').value.trim(),
                 description: document.getElementById('courseDesc').value.trim(),
-                lecturerId: String(dropVal).trim(),
+                lecturerId: isNaN(dropVal) ? dropVal.trim() : parseInt(dropVal),
                 role: 'admin'
             };
 
-            // DIBAIKI: Logik penukaran antara operasi PUT (kemaskini) atau POST (tambah baharu)
+            // DIBAIKI: Jika dalam operasi EDIT, bekalkan rujukan ID secara terus di dalam JSON payload
+            if (id) {
+                payload.id = id;
+                payload._id = id;
+                payload.courseId = id;
+            }
+
             let targetUrl = id ? `${API_BASE_URL}/api/courses/${id}` : `${API_BASE_URL}/api/courses`;
             let targetMethod = id ? 'PUT' : 'POST';
 
@@ -176,12 +180,14 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+                
                 if (res.ok) {
                     clearFormState();
                     await pullDirectoryData();
                     triggerAlert(id ? "Course mapping data updated successfully!" : "Course mapping data committed successfully!");
                 } else {
                     const data = await res.json();
+                    // JIKA GAGAL: Paparkan ralat sebenar daripada backend (bukan hijack status jadi hijau)
                     triggerAlert(data.error || "Error executing model layout query logic.", false);
                 }
             } catch (err) {
@@ -258,7 +264,6 @@
             window.location.href = "login.html";
         }
 
-        // Panggilan awal sistem
         pullDirectoryData();
         loadLecturers();
     </script>
